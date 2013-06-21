@@ -42,7 +42,7 @@ public class AuthorizationController {
             return "redirect:/welcome";
         }
         httpSession.setAttribute("user", list.get(0));
-        // comment 1
+        // comment 1 2
         return "redirect:/app";
     }
 

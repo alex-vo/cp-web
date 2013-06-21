@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!--
+        PostgreSQL connection <property name="connection.url">jdbc:mysql://81.198.32.151:3306/cityexplorer</property> <property name="connection.username">user</property> <property name="connection.password">123</property> <property name="connection.driver_class">com.mysql.jdbc.Driver</property> <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        -->
+        <!-- MySQL connection -->
+        <property name="connection.url">jdbc:mysql://192.168.1.102:3306/cloud_player</property>
+        <property name="connection.username">admin</property>
+        <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="connection.password">123</property>
+        <property name="transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+        <!--
+        thread is the short name for org.hibernate.context.ThreadLocalSessionContext and let Hibernate bind the session automatically to the thread
+        -->
+        <property name="current_session_context_class">thread</property>
+        <!-- this will show us all sql statements -->
+        <property name="hibernate.show_sql">true</property>
+        <!-- this will create the database tables for us -->
+        <property name="hibernate.hbm2ddl.auto">validate</property>
+
+        <mapping class="persistence.User"/>
+    </session-factory>
+</hibernate-configuration>

@@ -21,6 +21,9 @@
         </property>
     </bean>
 
+    <mvc:resources mapping="/css/**" location="/css/" />
+    <mvc:resources mapping="/img/**" location="/img/" />
+    <mvc:resources mapping="/js/**" location="/js/" />
     <mvc:annotation-driven />
 
 </beans>

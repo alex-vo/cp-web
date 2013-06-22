@@ -18,7 +18,7 @@
 <ul class="ui-player-body">
     <!--track list will be inserted here-->
 </ul>
-<div id="add-dropbox-button">ADD DROPOX</div>
+<div id="add-dropbox-button"><a href="addDropbox">ADD DROPOX</a></div>
 <div id="logout-button"><a href="logout">Logout</a></div>
 
 <div class="ui-player-header">

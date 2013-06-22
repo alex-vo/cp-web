@@ -17,11 +17,17 @@ public class User {
     @Column(name="id")
     private Long id;
 
-    @Column(name="login")
+    @Column(name="login", nullable = false)
     private String login;
 
-    @Column(name="password")
+    @Column(name="password", nullable = false)
     private String password;
+
+    @Column(name="dropbox_token")
+    private String dropboxToken;
+
+    @Column(name="dropbox_secret")
+    private String dropboxSecret;
 
     public Long getId() {
         return id;
@@ -41,5 +47,21 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getDropboxToken() {
+        return dropboxToken;
+    }
+
+    public void setDropboxToken(String dropboxToken) {
+        this.dropboxToken = dropboxToken;
+    }
+
+    public String getDropboxSecret() {
+        return dropboxSecret;
+    }
+
+    public void setDropboxSecret(String dropboxSecret) {
+        this.dropboxSecret = dropboxSecret;
     }
 }

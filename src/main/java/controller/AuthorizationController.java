@@ -1,11 +1,13 @@
 package controller;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.hibernate.Query;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
@@ -33,12 +35,12 @@ import java.util.List;
 public class AuthorizationController {
     public static final String APP_KEY = "vw5zvh4m1fr72kw";
     public static final String APP_SECRET = "0wjwqy7k55y0lzi";
+    public static final String DROPBOX_ACCESS_TOKEN = "https://api.dropbox.com/1/oauth/access_token";
+    public static final String DROPBOX_REQUEST_TOKEN = "https://api.dropbox.com/1/oauth/request_token";
     public static final String CALLBACK_URL = "http://localhost:8080/CloudPlayer/dropboxAuthComplete";
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
-        model.addAttribute("message", "Spring 3 MVC Hello World");
-        System.out.println("trololo");
         return "hello";
 
     }
@@ -66,37 +68,14 @@ public class AuthorizationController {
 
     @RequestMapping("/addDropbox")
     public String addDropbox(HttpSession httpSession){
-        String request = "https://api.dropbox.com/1/oauth/request_token";
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(request);
-
-        post.addHeader("Authorization", "OAuth oauth_version=\"1.0\", oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_consumer_key=\"" + APP_KEY + "\", oauth_signature=\"" + APP_SECRET + "&\"");
-
-        try {
-            HttpResponse response = client.execute(post);
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                InputStream instream = entity.getContent();
-                try {
-                    String responseString = IOUtils.toString(instream);
-                    String secret = responseString.substring(19, responseString.indexOf('&'));
-                    String token = responseString.substring(responseString.indexOf('&') + 13, responseString.length());
-                    Session session = HibernateUtil.getSessionFactory().openSession();
-                    Transaction transaction = session.beginTransaction();
-                    User currentUser = (User)httpSession.getAttribute("user");
-                    currentUser.setDropboxToken(token);
-                    currentUser.setDropboxSecret(secret);
-                    session.update(currentUser);
-                    transaction.commit();
-                    session.close();
-                    return "redirect:https://www.dropbox.com/1/oauth/authorize?oauth_token=" + token
-                            + "&oauth_callback=" + CALLBACK_URL;
-                } finally {
-                    instream.close();
-                }
-            }
-        } catch (IOException e) {
+        User currentUser = (User)httpSession.getAttribute("user");
+        try{
+            getDropboxToken(DROPBOX_REQUEST_TOKEN, currentUser, new BasicHeader("Authorization",
+                "OAuth oauth_version=\"1.0\", oauth_signature_method=\"PLAINTEXT\", " +
+                "oauth_consumer_key=\"" + APP_KEY + "\", oauth_signature=\"" + APP_SECRET + "&\""));
+            return "redirect:https://www.dropbox.com/1/oauth/authorize?oauth_token=" + currentUser.getDropboxToken()
+                    + "&oauth_callback=" + CALLBACK_URL;
+        }catch (Exception e){
             e.printStackTrace();
         }
         return "player";
@@ -104,13 +83,18 @@ public class AuthorizationController {
 
     @RequestMapping("dropboxAuthComplete")
     public String dropboxAuthComplete(HttpSession httpSession){
-        String request = "https://api.dropbox.com/1/oauth/access_token";
-        HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(request);
         User currentUser = (User) httpSession.getAttribute("user");
-        post.addHeader("Authorization", "OAuth oauth_version=\"1.0\", oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_consumer_key=\"" + APP_KEY + "\", oauth_token=\"" + currentUser.getDropboxToken() + "\", " +
-                "oauth_signature=\"" + APP_SECRET + "&" + currentUser.getDropboxSecret() + "\"");
+        getDropboxToken(DROPBOX_ACCESS_TOKEN, currentUser, new BasicHeader("Authorization", "OAuth oauth_version=\"1.0\", " +
+                "oauth_signature_method=\"PLAINTEXT\", oauth_consumer_key=\"" + APP_KEY + "\", oauth_token=\""
+                + currentUser.getDropboxToken() + "\", oauth_signature=\"" + APP_SECRET + "&"
+                + currentUser.getDropboxSecret() + "\""));
+        return "redirect:app";
+    }
+
+    private void getDropboxToken(String url, User user, Header header){
+        HttpClient client = new DefaultHttpClient();
+        HttpPost post = new HttpPost(url);
+        post.addHeader(header);
 
         try {
             HttpResponse response = client.execute(post);
@@ -119,16 +103,18 @@ public class AuthorizationController {
                 InputStream instream = entity.getContent();
                 try {
                     String responseString = IOUtils.toString(instream);
-                    String secret = responseString.substring(19, responseString.indexOf('&'));
-                    String token = responseString.substring(responseString.indexOf('&') + 13, responseString.indexOf("&uid"));
+                    System.out.println(responseString);
+                    String secret = responseString.substring(responseString.indexOf("oauth_token_secret=") + 19,
+                            responseString.indexOf('&'));
+                    String token = responseString.substring(responseString.indexOf("oauth_token=") + 12,
+                            responseString.indexOf("&uid") > 0 ? responseString.indexOf("&uid") : responseString.length());
                     Session session = HibernateUtil.getSessionFactory().openSession();
                     Transaction transaction = session.beginTransaction();
-                    currentUser.setDropboxToken(token);
-                    currentUser.setDropboxSecret(secret);
-                    session.update(currentUser);
+                    user.setDropboxToken(token);
+                    user.setDropboxSecret(secret);
+                    session.update(user);
                     transaction.commit();
                     session.close();
-                    return "redirect:app";
                 } finally {
                     instream.close();
                 }
@@ -136,6 +122,34 @@ public class AuthorizationController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "redirect:app";
+    }
+
+    @RequestMapping("/registerForm")
+    public String registerForm(){
+        return "registerForm";
+    }
+
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public String register(@RequestParam("login") String login,
+                           @RequestParam("password") String password,
+                           @RequestParam("password_repeat") String passwordRepeat){
+        try{
+            if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
+                return "redirect:welcome";
+            }
+            User newUser = new User();
+            Session session = HibernateUtil.getSessionFactory().openSession();
+            Transaction transaction = session.beginTransaction();
+            newUser.setLogin(login);
+            newUser.setPassword(password);
+            session.save(newUser);
+            transaction.commit();
+            session.close();
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "redirect:welcome";
     }
 }

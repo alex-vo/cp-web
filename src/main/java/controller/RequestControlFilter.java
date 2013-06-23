@@ -28,8 +28,9 @@ public class RequestControlFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          FilterChain filterChain) throws IOException, ServletException {
         String uri = ((HttpServletRequest) servletRequest).getRequestURI();
-        if(!uri.endsWith("/welcome") && !uri.endsWith("/login") &&
-                ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
+        if(!uri.endsWith("/register") && !uri.endsWith("/registerForm") && !uri.endsWith("/welcome")
+                && !uri.endsWith("/login")
+                && ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
             ((HttpServletResponse)servletResponse).sendRedirect("welcome");
         }
         filterChain.doFilter(servletRequest, servletResponse);

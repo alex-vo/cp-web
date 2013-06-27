@@ -8,7 +8,7 @@
         PostgreSQL connection <property name="connection.url">jdbc:mysql://81.198.32.151:3306/cityexplorer</property> <property name="connection.username">user</property> <property name="connection.password">123</property> <property name="connection.driver_class">com.mysql.jdbc.Driver</property> <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
         -->
         <!-- MySQL connection -->
-        <property name="connection.url">jdbc:mysql://192.168.1.102:3306/cloud_player</property>
+        <property name="connection.url">jdbc:mysql://localhost:3306/cloud_player</property>
         <property name="connection.username">admin</property>
         <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="dialect">org.hibernate.dialect.MySQLDialect</property>

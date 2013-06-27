@@ -23,12 +23,13 @@ import java.util.List;
 @Controller
 public class AuthorizationController {
 
+    // TODO: IM advice, use  more detailed mapping,ex: welcomePage -> hello.jsp, welcomeURI -> url://bla/welcome
+
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
         model.addAttribute("message", "Spring 3 MVC Hello World");
-        System.out.println("trololo");
+        System.out.println("welcome");
         return "hello";
-
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)

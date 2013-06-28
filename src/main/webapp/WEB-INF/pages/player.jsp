@@ -9,6 +9,7 @@
     <script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="js/jquery-ui-1.8.20.custom.min.js"></script>
     <script type="text/javascript" src="js/player.js"></script>
+    <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.20.custom.css"/>
     <link type="text/css" rel="stylesheet" href="css/style.css"/>
 </head>
@@ -29,13 +30,14 @@
     </div>
 </div>
 
+<div id="jquery_jplayer"></div>
 <audio controls="controls" id="player" preload="auto" style="display: none;" >
     <source src="" type="audio/mpeg">
 </audio>
 <script type="text/javascript">
     $(document).ready(function() {
         var audio = document.getElementById('player');
-        pagePlayer = new Player(audio);
+        pagePlayer = new Player();
     });
 </script>
 

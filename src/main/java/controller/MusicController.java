@@ -37,10 +37,10 @@ public class MusicController {
     @ResponseBody
     public String getSongSrc(@RequestParam("name") String name){
         if("Kalimba.mp3".equals(name)){
-            return "https://dl.dropboxusercontent.com/1/view/k511e7zqj3uubtf/Kalimba.mp3";
+            return "https://dl.dropboxusercontent.com/1/view/gnjd5g96fp8hbw6/Kalimba.mp3";
         }
         if("Maid with the Flaxen Hair.mp3".equals(name)){
-            return "https://dl.dropboxusercontent.com/1/view/w62y2p99k29k398/Maid%20with%20the%20Flaxen%20Hair.mp3";
+            return "https://dl.dropboxusercontent.com/1/view/jx28pqwdck0bg4q/Maid%20with%20the%20Flaxen%20Hair.mp3";
         }
         return "";
     }

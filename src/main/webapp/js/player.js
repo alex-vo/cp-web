@@ -1,13 +1,25 @@
 // playerObj should be standart JS DOM instance
-Player = function(playerObj) {
+Player = function() {
     this.list = new Array("Kalimba.mp3", "Maid with the Flaxen Hair.mp3");
     this.current = null;
-    this.player = playerObj;
     this.paused = true;
     this.seeking = false;
+    $("#jquery_jplayer").jPlayer({
+        swfPath: "js/Jplayer.swf",
+        supplied: "mp3",
+        volume: 1,
+        wmode:"window",
+        solution: "html,flash",
+        errorAlerts: true,
+        warningAlerts: false,
+        ended: function () {
+            pagePlayer.next();
+        }
+    });
 
-    $(this.player).bind('timeupdate', function() {
-        var left = ((this.currentTime / this.duration) * $("#progress-indicator").parent().width()) - 4;
+    $("#jquery_jplayer").bind($.jPlayer.event.timeupdate, function() {
+        var left = (($("#jquery_jplayer").data("jPlayer").status.currentTime
+            / $("#jquery_jplayer").data("jPlayer").status.duration) * $("#progress-indicator").parent().width()) - 4;
         $("#progress-indicator").css('left', left);
     });
     var dragStart = $("#progress-indicator").parent().offset().left - 4;
@@ -16,7 +28,8 @@ Player = function(playerObj) {
         stop: function() {
             var offset = ($("#progress-indicator").offset().left
                 - $("#progress-indicator").parent().offset().left + 4) / $("#progress-indicator").parent().width();
-            pagePlayer.player.currentTime = pagePlayer.player.duration * offset;
+            var time = $("#jquery_jplayer").data("jPlayer").status.duration * offset;
+            $("#jquery_jplayer").jPlayer("play", time);
         }
     });
 
@@ -58,10 +71,8 @@ Player = function(playerObj) {
             this.pauseTrack();
         }
     }
+
     this.getTrackList();
-    this.player.addEventListener("ended", function(){
-        alert("finish");
-    });
 
     this.next = function(){
         for(var i = 0; i < this.list.length; i++){
@@ -78,7 +89,7 @@ Player = function(playerObj) {
         this.playTrack();
     }
 
-    this.next = function(){
+    this.prev = function(){
         for(var i = 0; i < this.list.length; i++){
             if(this.current == this.list[i]){
                 if(i == 0){
@@ -99,7 +110,9 @@ Player = function(playerObj) {
             async: false,
             cache: false,
             success: function(data){
-                pagePlayer.player.src = data;
+                $("#jquery_jplayer").jPlayer("setMedia", {
+                    mp3: data
+                } );
             }
         });
     }
@@ -114,15 +127,14 @@ Player = function(playerObj) {
             }
         });
         $("#track-name").text(this.current);
-        this.player.play();
+        $("#jquery_jplayer").jPlayer("play");
     }
 
     this.pauseTrack = function(){
         this.paused = true;
         $("#button-play-pause").attr('class', 'button-play-big');
         $(".pause-small").attr("class", "play-small");
-        this.player.pause();
+        $("#jquery_jplayer").jPlayer("pause");
     }
-    //this.redrawProgress();
 };
 

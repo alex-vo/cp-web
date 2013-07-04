@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>CloudPlayer</groupId>
-    <artifactId>CloudPlayer</artifactId>
+    <groupId>cp-web</groupId>
+    <artifactId>cp-web</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
         <spring.version>3.0.5.RELEASE</spring.version>
@@ -72,7 +72,7 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>CloudPlayer</finalName>
+        <finalName>cp-web</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

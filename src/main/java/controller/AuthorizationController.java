@@ -133,23 +133,11 @@ public class AuthorizationController {
     public String register(@RequestParam("login") String login,
                            @RequestParam("password") String password,
                            @RequestParam("password_repeat") String passwordRepeat){
-        try{
-            if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
-                return "redirect:welcome";
-            }
-            User newUser = new User();
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            Transaction transaction = session.beginTransaction();
-            newUser.setLogin(login);
-            newUser.setPassword(password);
-            session.save(newUser);
-            transaction.commit();
-            session.close();
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        }catch (Exception e){
-            e.printStackTrace();
+        if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
+            //TODO add error
+            return "redirect:welcome";
         }
+
         return "redirect:welcome";
     }
 }

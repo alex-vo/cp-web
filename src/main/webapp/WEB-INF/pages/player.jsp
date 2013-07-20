@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
-    <title>LeD player</title>
+    <title>Cloud Player</title>
 
     <meta charset="UTF-8" />
 
@@ -22,7 +22,7 @@
             <div id="button-prev" onclick="pagePlayer.next();"></div>
             <div id="button-play-pause" class="button-play-big" onclick="pagePlayer.playStop();"></div>
             <div id="button-next" onclick="pagePlayer.next();"></div>
-            <div id="track-name">Kalimba.mp3</div>
+            <div id="track-name"></div>
             <div id="progress-bar">
                 <div id="progress-indicator"></div>
             </div>

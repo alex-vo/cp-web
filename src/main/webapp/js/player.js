@@ -24,6 +24,7 @@ Player = function() {
     });
     var dragStart = $("#progress-indicator").parent().offset().left - 4;
     var dragFinish = dragStart + $("#progress-indicator").parent().width();
+    //TODO draggable - incorrect progress
     $("#progress-indicator").draggable({ axis: "x", containment: [dragStart,0,dragFinish,0],
         stop: function() {
             var offset = ($("#progress-indicator").offset().left
@@ -34,27 +35,24 @@ Player = function() {
     });
 
     this.getTrackList = function() {
-        var url = 'getTrackList';
+        var url = 'api/getMusicList?path=';
         $.ajax({
             url: url,
             cache: false,
             dataType: 'json',
             success: function(data) {
-                self.list = data;
-                $('.ui-player-body').empty();
-                for (var i = 0; i < data["songs"].length; i++) {
-                    var title = data["songs"][i];
-
-                    if (title.length > 45) {
-                        title = title.substr(0, 45) + ' ...';
+                if(data && data["songs"]){
+                    pagePlayer.list = data["songs"];
+                    $('.ui-player-body').empty();
+                    for (var i = 0; i < data["songs"].length; i++) {
+                        var title = data["songs"][i].substr(data["songs"][i].lastIndexOf("/") + 1, data["songs"][i].length);
+                        var s =
+                            '<div class="listed-track">'+
+                                '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
+                                '<span class="track-title">' + title + '</span>  <br/>'+
+                            '</div>';
+                        $('.player-body').append(s);
                     }
-
-                    var s =
-                        '<div class="listed-track">'+
-                            '<div class="play-small"></div>' +
-                            '<span class="track-title">' + title + '</span>  <br/>'+
-                        '</div>';
-                    $('.player-body').append(s);
                 }
             }
         });
@@ -106,7 +104,7 @@ Player = function() {
 
     getSongSource = function(songName){
         $.ajax({
-            url: "getSongSrc?name=" + songName,
+            url: "api/getLink?path=" + songName,
             async: false,
             cache: false,
             success: function(data){
@@ -121,20 +119,36 @@ Player = function() {
         this.paused = false;
         $("#button-play-pause").attr('class', 'button-pause-big');
         $(".pause-small").attr("class", "play-small");
+        var songName = this.current.substr(this.current.lastIndexOf("/") + 1, this.current.length);
         $(".listed-track").each(function(){
-            if($(this).find(".track-title").text() == pagePlayer.current){
+            if($(this).find(".track-title").text() == songName){
                 $(this).find(".play-small").attr("class", "pause-small");
             }
         });
-        $("#track-name").text(this.current);
-        $("#jquery_jplayer").jPlayer("play");
+        if(songName){
+            $("#track-name").text(songName);
+            $("#jquery_jplayer").jPlayer("play");
+        }
     }
 
     this.pauseTrack = function(){
         this.paused = true;
         $("#button-play-pause").attr('class', 'button-play-big');
         $(".pause-small").attr("class", "play-small");
-        $("#jquery_jplayer").jPlayer("pause");
+        if($("#jquery_jplayer").data("jPlayer").status.src){
+            $("#jquery_jplayer").jPlayer("pause");
+        }
+    }
+
+    this.playSong = function(obj){
+        if(this.current == this.list[$(".listed-track").index($(obj).closest(".listed-track"))]){
+            this.playStop();
+        }else{
+            this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
+            getSongSource(this.current);
+            console.log(this.current);
+            this.playTrack();
+        }
     }
 };
 

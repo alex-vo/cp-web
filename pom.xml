@@ -70,6 +70,29 @@
             <artifactId>javassist</artifactId>
             <version>3.12.1.GA</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cp-core</groupId>
+            <artifactId>cp-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${jboss.as.home}/standalone/lib/cp-core-1.0-SNAPSHOT-client.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>jboss-client</groupId>
+            <artifactId>jboss-client</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${jboss.as.home}/bin/client/jboss-client.jar</systemPath>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>cp-web</finalName>

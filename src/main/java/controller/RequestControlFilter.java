@@ -1,15 +1,9 @@
 package controller;
 
-import org.hibernate.Query;
-import org.hibernate.classic.Session;
-import persistence.HibernateUtil;
-import persistence.User;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,8 +22,9 @@ public class RequestControlFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          FilterChain filterChain) throws IOException, ServletException {
         String uri = ((HttpServletRequest) servletRequest).getRequestURI();
-        if(!uri.endsWith("/welcome") && !uri.endsWith("/login") &&
-                ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
+        if(!uri.endsWith("/register") && !uri.endsWith("/registerForm") && !uri.endsWith("/welcome")
+                && !uri.endsWith("/login")
+                && ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
             ((HttpServletResponse)servletResponse).sendRedirect("welcome");
         }
         filterChain.doFilter(servletRequest, servletResponse);

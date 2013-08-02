@@ -1,6 +1,8 @@
 package controller;
 
 import ejb.AuthorizationBeanRemote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,11 +23,15 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 public class AuthorizationController {
+
+    final static Logger logger = LoggerFactory.getLogger(AuthorizationController.class);
+
     //TODO put into .properties
     public static final String CALLBACK_URL = "http://localhost:9090/cp-web/dropboxAuthComplete";
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
+        logger.info("welcome page loaded");
         return "hello";
     }
 
@@ -65,6 +71,7 @@ public class AuthorizationController {
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             String dropboxUrl = bean.getDropboxAuthLink((Long) httpSession.getAttribute("user"));
             if(dropboxUrl != null){
+                logger.info("Dropbox acc linked");
                 return "redirect:" + dropboxUrl + "&oauth_callback=" + CALLBACK_URL; //TODO move this to core
             }
         } catch (NamingException ne) {
@@ -93,6 +100,7 @@ public class AuthorizationController {
         } catch (Exception e){
             e.printStackTrace();
         }
+        logger.info("Dropbox auth not successful");
         //TODO add error message
         return "redirect:app";
     }
@@ -118,6 +126,7 @@ public class AuthorizationController {
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean registered = bean.registerUser(login, password);
             if(registered){
+                logger.info("Registration completed");
                 //TODO add success message
                 return "redirect:welcome";
             }
@@ -126,6 +135,7 @@ public class AuthorizationController {
         } catch (Exception e){
             e.printStackTrace();
         }
+        logger.info("! Registration completed unsuccessfully ");
         //TODO add error
         return "redirect:welcome";
     }

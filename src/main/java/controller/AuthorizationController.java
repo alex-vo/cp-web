@@ -108,7 +108,7 @@ public class AuthorizationController {
                            @RequestParam("password_repeat") String passwordRepeat){
         if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
             //TODO add error
-            return "redirect:register";
+            return "redirect:registerForm";
         }
         try {
             //TODO make static

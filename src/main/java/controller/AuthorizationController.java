@@ -1,16 +1,23 @@
 package controller;
 
 import ejb.AuthorizationBeanRemote;
+import model.LoginFormModel;
+import model.RegisterFormModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import remote.RemotingManager;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,17 +33,25 @@ public class AuthorizationController {
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
+        if(!model.containsAttribute("loginForm")) model.addAttribute("loginForm", new LoginFormModel());
         return "hello";
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(@RequestParam("login") String login, @RequestParam("password") String password, HttpSession httpSession){
+    public String login(@Valid @ModelAttribute("loginForm") LoginFormModel loginForm, BindingResult binding,
+                        RedirectAttributes redirectAttributes, HttpSession httpSession){
+        if (binding.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginForm", binding);
+            redirectAttributes.addFlashAttribute("loginForm", loginForm);
+            redirectAttributes.addFlashAttribute("successMessage", "Fuck");
+            return "redirect:/welcome";
+        }
         try {
             RemotingManager remotingManager = new RemotingManager();
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Long userId = bean.login(login, password);
+            Long userId = bean.login(loginForm.getLogin(), loginForm.getPassword());
             if(userId != null && userId > 0){
                 httpSession.setAttribute("user", userId);
                 return "redirect:/app";
@@ -98,17 +113,23 @@ public class AuthorizationController {
     }
 
     @RequestMapping("/registerForm")
-    public String registerForm(){
+    public String registerForm(ModelMap model){
+        if(!model.containsAttribute("registerForm")) model.addAttribute("registerForm", new RegisterFormModel());
         return "registerForm";
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(@RequestParam("login") String login,
-                           @RequestParam("password") String password,
-                           @RequestParam("password_repeat") String passwordRepeat){
-        if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
-            //TODO add error
-            return "redirect:register";
+    public String register(ModelMap model,
+                           @Valid @ModelAttribute("registerForm") RegisterFormModel registerFormModel,
+                           BindingResult binding,
+                           RedirectAttributes redirectAttributes){
+        if(!registerFormModel.getPassword().equals(registerFormModel.getRepeatPassword())){
+            binding.addError(new FieldError("loginForm", "password", "Passwords must match"));
+        }
+        if(binding.hasErrors()){
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.registerForm", binding);
+            redirectAttributes.addFlashAttribute("registerForm", registerFormModel);
+            return "redirect:registerForm";
         }
         try {
             //TODO make static
@@ -116,10 +137,10 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Boolean registered = bean.registerUser(login, password);
+            Boolean registered = bean.registerUser(registerFormModel.getLogin(), registerFormModel.getPassword());
             if(registered){
-                //TODO add success message
-                return "redirect:welcome";
+                redirectAttributes.addFlashAttribute("successMessage", "Registration completed successfully");
+                return "redirect:/welcome";
             }
         } catch (NamingException ne) {
             ne.printStackTrace();

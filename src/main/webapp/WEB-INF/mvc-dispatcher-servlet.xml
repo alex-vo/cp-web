@@ -21,9 +21,6 @@
         </property>
     </bean>
 
-    <bean id="fooBean" class="bo.HelloWorld">
-    </bean>
-
     <bean id="localProperties"
           class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="location" value="/WEB-INF/local.properties" />

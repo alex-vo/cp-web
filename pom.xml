@@ -82,7 +82,7 @@
             <artifactId>cp-core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>/home/alex/jboss-as-7.1.1.Final/standalone/lib/cp-core-1.0-SNAPSHOT-client.jar</systemPath>
+            <systemPath>${jboss.as.home}/standalone/lib/cp-core-1.0-SNAPSHOT-client.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -90,7 +90,7 @@
             <artifactId>jboss-client</artifactId>
             <version>1.0</version>
             <scope>system</scope>
-            <systemPath>/home/alex/jboss-as-7.1.1.Final/bin/client/jboss-client.jar</systemPath>
+            <systemPath>${jboss.as.home}/bin/client/jboss-client.jar</systemPath>
         </dependency>
 
     </dependencies>

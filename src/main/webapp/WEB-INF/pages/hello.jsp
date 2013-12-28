@@ -4,7 +4,7 @@
 
 <html>
 <head>
-	<title>Spring Form Validation</title>
+    <title>Cloud Player</title>
 	<style type="text/css">
 		label { width: 70px; display: inline-block; }
 		input, textarea { width: 320px; }

@@ -17,7 +17,6 @@ public class LoginFormModel {
     private String login;
 
     @NotBlank(message = "Please provide password")
-    @Size(min = 5, message = "Please enter at least 5 characters")
     private String password;
 
     private String successMessage;

@@ -10,7 +10,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import remote.RemotingManager;
 
@@ -43,7 +42,7 @@ public class AuthorizationController {
         if (binding.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginForm", binding);
             redirectAttributes.addFlashAttribute("loginForm", loginForm);
-            redirectAttributes.addFlashAttribute("successMessage", "Fuck");
+            redirectAttributes.addFlashAttribute("successMessage", "Failed to log in");
             return "redirect:/welcome";
         }
         try {
@@ -91,7 +90,7 @@ public class AuthorizationController {
     }
 
     @RequestMapping("dropboxAuthComplete")
-    public String dropboxAuthComplete(HttpSession httpSession){
+    public String dropboxAuthComplete(RedirectAttributes redirectAttributes, HttpSession httpSession){
         try {
             //TODO make static
             RemotingManager remotingManager = new RemotingManager();
@@ -100,7 +99,7 @@ public class AuthorizationController {
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean retrievedToken = bean.retrieveDropboxAccessToken((Long) httpSession.getAttribute("user"));
             if(retrievedToken){
-                //TODO add success message
+                redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
                 return "redirect:app";
             }
         } catch (NamingException ne) {
@@ -108,7 +107,7 @@ public class AuthorizationController {
         } catch (Exception e){
             e.printStackTrace();
         }
-        //TODO add error message
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
         return "redirect:app";
     }
 
@@ -119,8 +118,7 @@ public class AuthorizationController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(ModelMap model,
-                           @Valid @ModelAttribute("registerForm") RegisterFormModel registerFormModel,
+    public String register(@Valid @ModelAttribute("registerForm") RegisterFormModel registerFormModel,
                            BindingResult binding,
                            RedirectAttributes redirectAttributes){
         if(!registerFormModel.getPassword().equals(registerFormModel.getRepeatPassword())){
@@ -147,7 +145,7 @@ public class AuthorizationController {
         } catch (Exception e){
             e.printStackTrace();
         }
-        //TODO add error
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to register");
         return "redirect:welcome";
     }
 }

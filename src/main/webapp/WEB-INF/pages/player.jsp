@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
 <html>
 <head>
     <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
@@ -15,6 +18,8 @@
 </head>
 <body>
 
+<div id="successMessage"><c:out value="${successMessage}"/></div>
+<div id="errorMessage"><c:out value="${errorMessage}"/></div>
 <div id="add-dropbox-button"><a href="addDropbox">ADD DROPOX</a></div>
 <div class="player-body">
     <div id="player-controls">

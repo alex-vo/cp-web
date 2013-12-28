@@ -15,10 +15,11 @@
 <body>
 
 <div id="successMessage"><c:out value="${successMessage}"/></div>
+<div id="errorMessage"><c:out value="${errorMessage}"/></div>
 <form:form modelAttribute="loginForm" method="post" action="login">
     <form:label path="login">Login</form:label> : <form:input type="text" path="login" />
     <form:errors path="login" cssClass="red" /><br/>
-    <form:label path="password">Password</form:label> : <form:input type="text" path="password" />
+    <form:label path="password">Password</form:label> : <form:input type="password" path="password" />
     <form:errors path="password" cssClass="red" /><br/>
     <button>Login</button><br/>
 </form:form>

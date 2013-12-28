@@ -17,9 +17,9 @@
 <form:form modelAttribute="registerForm" method="post" action="register">
     <form:label path="login">Login</form:label> : <form:input type="text" path="login" />
     <form:errors path="login" cssClass="red" /><br/>
-    <form:label path="password">Password</form:label> : <form:input type="text" path="password" />
+    <form:label path="password">Password</form:label> : <form:input type="password" path="password" />
     <form:errors path="password" cssClass="red" /><br/>
-    <form:label path="repeatPassword">Password</form:label> : <form:input type="text" path="repeatPassword" />
+    <form:label path="repeatPassword">Password</form:label> : <form:input type="password" path="repeatPassword" />
     <form:errors path="repeatPassword" cssClass="red" /><br/>
     <button>Register</button><br/>
 </form:form>

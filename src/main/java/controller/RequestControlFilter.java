@@ -26,6 +26,7 @@ public class RequestControlFilter implements Filter {
                 && !uri.endsWith("/login")
                 && ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
             ((HttpServletResponse)servletResponse).sendRedirect("welcome");
+            return;
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

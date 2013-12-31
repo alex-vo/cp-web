@@ -23,7 +23,7 @@
 
     <bean id="localProperties"
           class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="location" value="/WEB-INF/local.properties" />
+        <property name="location" value="classpath:local.properties" />
     </bean>
 
     <mvc:resources mapping="/css/**" location="/css/" />

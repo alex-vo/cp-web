@@ -14,14 +14,14 @@ import java.util.Hashtable;
  */
 public class RemotingManager {
     private Context context;
-    public RemotingManager() throws NamingException {
-        //TODO use .properties
+
+    public RemotingManager(String jbossURL, String jbossLogin, String jbossPassword) throws NamingException {
         final Hashtable jndiProperties = new Hashtable();
-        jndiProperties.put(Context.PROVIDER_URL, "remote://localhost:4447");
+        jndiProperties.put(Context.PROVIDER_URL, jbossURL);
         jndiProperties.put(Context.INITIAL_CONTEXT_FACTORY,
                 "org.jboss.naming.remote.client.InitialContextFactory");
-        jndiProperties.put(Context.SECURITY_PRINCIPAL, "alex");
-        jndiProperties.put(Context.SECURITY_CREDENTIALS, "123");
+        jndiProperties.put(Context.SECURITY_PRINCIPAL, jbossLogin);
+        jndiProperties.put(Context.SECURITY_CREDENTIALS, jbossPassword);
         jndiProperties.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
         jndiProperties.put("jboss.naming.client.ejb.context", true);
         context = new InitialContext(jndiProperties);

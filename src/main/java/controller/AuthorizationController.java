@@ -1,6 +1,7 @@
 package controller;
 
 import ejb.AuthorizationBeanRemote;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +22,18 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 public class AuthorizationController {
-    //TODO put into .properties
-    public static final String CALLBACK_URL = "http://localhost:9090/cp-web/dropboxAuthComplete";
+
+    @Value("#{localProperties['callback.url']}")
+    public String CALLBACK_URL;
+
+    @Value("#{localProperties['jboss.login']}")
+    public String JBOSS_LOGIN;
+
+    @Value("#{localProperties['jboss.password']}")
+    public String JBOSS_PASSWORD;
+
+    @Value("#{localProperties['jboss.url']}")
+    public String JBOSS_URL;
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
@@ -32,7 +43,7 @@ public class AuthorizationController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(@RequestParam("login") String login, @RequestParam("password") String password, HttpSession httpSession){
         try {
-            RemotingManager remotingManager = new RemotingManager();
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
@@ -59,7 +70,7 @@ public class AuthorizationController {
     public String addDropbox(HttpSession httpSession){
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager();
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
@@ -79,7 +90,7 @@ public class AuthorizationController {
     public String dropboxAuthComplete(HttpSession httpSession){
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager();
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
@@ -108,11 +119,11 @@ public class AuthorizationController {
                            @RequestParam("password_repeat") String passwordRepeat){
         if(!password.equals(passwordRepeat) || password.length() < 5 || login.length() < 5){
             //TODO add error
-            return "redirect:register";
+            return "redirect:registerForm";
         }
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager();
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");

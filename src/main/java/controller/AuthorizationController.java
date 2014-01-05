@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import remote.RemotingManager;
 
@@ -29,8 +30,11 @@ import javax.validation.Valid;
 @Controller
 public class AuthorizationController {
 
-    @Value("#{localProperties['callback.url']}")
-    public String CALLBACK_URL;
+    @Value("#{localProperties['dropbox. callback.url']}")
+    public String DROPBOX_CALLBACK_URL;
+
+    @Value("#{localProperties['drive.redirect_uri']}")
+    public String DRIVE_REDIRECT_URI;
 
     @Value("#{localProperties['jboss.login']}")
     public String JBOSS_LOGIN;
@@ -91,7 +95,7 @@ public class AuthorizationController {
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             String dropboxUrl = bean.getDropboxAuthLink((Long) httpSession.getAttribute("user"));
             if(dropboxUrl != null){
-                return "redirect:" + dropboxUrl + "&oauth_callback=" + CALLBACK_URL; //TODO move this to core
+                return "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
             }
         } catch (NamingException ne) {
             ne.printStackTrace();
@@ -120,6 +124,33 @@ public class AuthorizationController {
             e.printStackTrace();
         }
         redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
+        return "redirect:app";
+    }
+
+    @RequestMapping("/addDrive")
+    public String addGDrive(HttpSession httpSession){
+        return "redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri="
+                + DRIVE_REDIRECT_URI
+                + "&response_type=code&client_id=737947483653-ul7ktdr1srcrbe4qt1kkednt8te0qfh9.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
+    }
+
+    @RequestMapping("driveAuthComplete")
+    public String driveAuthComplete(@RequestParam(value = "code") String code,
+                                    RedirectAttributes redirectAttributes,
+                                    HttpSession httpSession){
+        try {
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
+                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
+            if(retrievedCredentials){
+                redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
+                return "redirect:app";
+            }
+        } catch (NamingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         return "redirect:app";
     }
 

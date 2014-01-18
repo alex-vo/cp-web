@@ -33,7 +33,7 @@ public class AuthorizationController {
     @Value("#{localProperties['dropbox. callback.url']}")
     public String DROPBOX_CALLBACK_URL;
 
-    @Value("#{localProperties['drive.redirect_uri']}")
+    @Value("#{localProperties['drive.redirect.uri']}")
     public String DRIVE_REDIRECT_URI;
 
     @Value("#{localProperties['jboss.login']}")

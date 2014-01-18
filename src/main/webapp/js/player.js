@@ -1,4 +1,5 @@
 // playerObj should be standart JS DOM instance
+var songData = new Array();
 Player = function() {
     this.list = new Array("Kalimba.mp3", "Maid with the Flaxen Hair.mp3");
     this.current = null;
@@ -45,7 +46,8 @@ Player = function() {
                     pagePlayer.list = data["songs"];
                     $('.ui-player-body').empty();
                     for (var i = 0; i < data["songs"].length; i++) {
-                        var title = data["songs"][i].substr(data["songs"][i].lastIndexOf("/") + 1, data["songs"][i].length);
+                        songData = data["songs"];
+                        var title = data["songs"][i][0].substr(data["songs"][i][0].lastIndexOf("/") + 1, data["songs"][i][0].length);
                         var s =
                             '<div class="listed-track">'+
                                 '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
@@ -145,6 +147,7 @@ Player = function() {
             this.playStop();
         }else{
             this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
+            console.log(this.current);
             getSongSource(this.current);
             console.log(this.current);
             this.playTrack();

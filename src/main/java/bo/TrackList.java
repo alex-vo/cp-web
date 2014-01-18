@@ -10,13 +10,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TrackList {
-    private List<String> songs;
+    private List<String[]> songs;
 
-    public List<String> getSongs() {
+    public List<String[]> getSongs() {
         return songs;
     }
 
-    public void setSongs(List<String> songs) {
+    public void setSongs(List<String[]> songs) {
         this.songs = songs;
     }
 }

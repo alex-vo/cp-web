@@ -36,6 +36,9 @@ public class AuthorizationController {
     @Value("#{localProperties['drive.redirect.uri']}")
     public String DRIVE_REDIRECT_URI;
 
+    @Value("#{localProperties['drive.client.id']}")
+    public String DRIVE_CLIENT_ID;
+
     @Value("#{localProperties['jboss.login']}")
     public String JBOSS_LOGIN;
 
@@ -149,7 +152,8 @@ public class AuthorizationController {
     public String addGDrive(HttpSession httpSession){
         return "redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri="
                 + DRIVE_REDIRECT_URI
-                + "&response_type=code&client_id=737947483653-ul7ktdr1srcrbe4qt1kkednt8te0qfh9.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
+                + "&response_type=code&client_id=" + DRIVE_CLIENT_ID
+                + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
     }
 
     @RequestMapping("/removeDrive")

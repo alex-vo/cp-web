@@ -20,7 +20,14 @@
 
 <div id="successMessage"><c:out value="${successMessage}"/></div>
 <div id="errorMessage"><c:out value="${errorMessage}"/></div>
-<div id="add-dropbox-button"><a href="addDropbox">ADD DROPOX</a></div>
+<ul id="add-cloud-button">
+    <li><a href="addDropbox">ADD DROPOX</a></li>
+    <li><a href="addDrive">ADD GOOGLE DRIVE</a></li>
+</ul>
+<ul id="remove-cloud-button">
+    <li><a href="removeDropbox">Disconnect Dropbox account</a></li>
+    <li><a href="removeDrive">Disconnect Google Drive account</a></li>
+</ul>
 <div class="player-body">
     <div id="player-controls">
         <div id="control-buttoms">
@@ -33,6 +40,7 @@
             </div>
         </div>
     </div>
+    <div id="track-list" class="waiting"></div>
 </div>
 
 <div id="jquery_jplayer"></div>

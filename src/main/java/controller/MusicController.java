@@ -49,8 +49,7 @@ public class MusicController {
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
             List<String[]> fileList = bean.getFiles(path, true, (Long) httpSession.getAttribute("user"));
-            TrackList trackList = new TrackList();
-            trackList.setSongs(fileList);
+            TrackList trackList = new TrackList(fileList);
             return trackList;
         } catch (NamingException ne) {
             ne.printStackTrace();

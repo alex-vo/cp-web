@@ -30,7 +30,7 @@ import javax.validation.Valid;
 @Controller
 public class AuthorizationController {
 
-    @Value("#{localProperties['dropbox. callback.url']}")
+    @Value("#{localProperties['dropbox.callback.url']}")
     public String DROPBOX_CALLBACK_URL;
 
     @Value("#{localProperties['drive.redirect.uri']}")
@@ -105,6 +105,24 @@ public class AuthorizationController {
         return "player";
     }
 
+    @RequestMapping("/removeDropbox")
+    public String removeDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
+        try {
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
+                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            Boolean removedDropboxAccount = bean.removeDropboxAcoount((Long) httpSession.getAttribute("user"));
+            if(removedDropboxAccount){
+                redirectAttributes.addFlashAttribute("successMessage", "Removed Dropbox account");
+                return "redirect:app";
+            }
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+        return "redirect:app";
+    }
+
     @RequestMapping("dropboxAuthComplete")
     public String dropboxAuthComplete(RedirectAttributes redirectAttributes, HttpSession httpSession){
         try {
@@ -134,6 +152,24 @@ public class AuthorizationController {
                 + "&response_type=code&client_id=737947483653-ul7ktdr1srcrbe4qt1kkednt8te0qfh9.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
     }
 
+    @RequestMapping("/removeDrive")
+    public String removeDrive(RedirectAttributes redirectAttributes, HttpSession httpSession){
+        try {
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
+                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            Boolean removedDriveAccount = bean.removeGDriveAccount((Long) httpSession.getAttribute("user"));
+            if(removedDriveAccount){
+                redirectAttributes.addFlashAttribute("successMessage", "Removed Google Drive account");
+                return "redirect:app";
+            }
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+        return "redirect:app";
+    }
+
     @RequestMapping("driveAuthComplete")
     public String driveAuthComplete(@RequestParam(value = "code") String code,
                                     RedirectAttributes redirectAttributes,
@@ -151,6 +187,7 @@ public class AuthorizationController {
         } catch (NamingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
         return "redirect:app";
     }
 

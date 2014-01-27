@@ -41,19 +41,7 @@ Player = function() {
             cache: false,
             dataType: 'json',
             success: function(data) {
-                if(data && data["songs"]){
-                    pagePlayer.list = data["songs"];
-                    $('.ui-player-body').empty();
-                    for (var i = 0; i < data["songs"].length; i++) {
-                        var title = data["songs"][i].substr(data["songs"][i].lastIndexOf("/") + 1, data["songs"][i].length);
-                        var s =
-                            '<div class="listed-track">'+
-                                '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
-                                '<span class="track-title">' + title + '</span>  <br/>'+
-                            '</div>';
-                        $('.player-body').append(s);
-                    }
-                }
+                renderTrackList(data);
             }
         });
     };
@@ -61,7 +49,8 @@ Player = function() {
     this.playStop = function(){
         if(!this.current){
             this.current = this.list[0];
-            getSongSource(this.current);
+
+            selectSongByElement(this.current);
         }
         if(this.paused){
             this.playTrack();
@@ -83,7 +72,8 @@ Player = function() {
                 break;
             }
         }
-        getSongSource(this.current);
+        selectSongByElement(this.current);
+
         this.playTrack();
     }
 
@@ -98,21 +88,9 @@ Player = function() {
                 break;
             }
         }
-        getSongSource(this.current);
-        this.playTrack();
-    }
+        selectSongByElement(this.current);
 
-    getSongSource = function(songName){
-        $.ajax({
-            url: "api/getLink?path=" + songName,
-            async: false,
-            cache: false,
-            success: function(data){
-                $("#jquery_jplayer").jPlayer("setMedia", {
-                    mp3: data
-                } );
-            }
-        });
+        this.playTrack();
     }
 
     this.playTrack = function(){
@@ -145,10 +123,78 @@ Player = function() {
             this.playStop();
         }else{
             this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
-            getSongSource(this.current);
+            selectSongByElement(this.current);
+
             console.log(this.current);
             this.playTrack();
         }
+    }
+
+    this.getMetadata = function(obj){
+        this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
+        var songURL = getSongURL(this.current);
+        getSongMetadataByURL(songURL);
+    }
+
+    renderTrackList = function(data){
+        if(data && data["songs"]){
+            pagePlayer.list = data["songs"];
+            $('.ui-player-body').empty();
+            for (var i = 0; i < data["songs"].length; i++) {
+                renderTrack(data["songs"][i]);
+            }
+        }
+    }
+
+    renderTrack = function(song){
+        var title = song.substr(song.lastIndexOf("/") + 1, song.length);
+        var trackHtml =
+            '<div class="listed-track">'+
+                '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
+                '<span class="track-title">' + title + '</span>' +
+                '<span class="getMetadata" onclick="pagePlayer.getMetadata(this)">get Metadata</span>' +
+                '<br/>'+
+                '</div>';
+        $('.player-body').append(trackHtml);
+    }
+
+    selectSongByElement = function(element){
+        songUrl = getSongURL(element);
+        selectSongByUrl(songUrl);
+    }
+
+
+    selectSongByUrl = function(songUrl){
+        $("#jquery_jplayer").jPlayer("setMedia", {
+            mp3: songUrl
+        } );
+    }
+
+
+    getSongURL = function(songName){
+        var srcURL = "";
+        $.ajax({
+            url: "api/getLink?path=" + songName,
+            async: false,
+            cache: false,
+            success: function(data){
+                srcURL = data;
+                console.log(data);
+            }
+        });
+        return srcURL;
+    }
+
+    getSongMetadataByURL = function(data){
+        var songUrlThroughProxy = proxyURL + data;
+        var tags = null;
+
+        ID3.loadTags(songUrlThroughProxy, function(){
+            tags = ID3.getAllTags(songUrlThroughProxy);
+            console.log(tags);
+        });
+
+        return tags;
     }
 };
 

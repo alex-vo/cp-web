@@ -34,8 +34,12 @@ public class MusicController {
     @Value("#{localProperties['jboss.url']}")
     public String JBOSS_URL;
 
+    @Value("#{localProperties['proxy.url']}")
+    public String PROXY_URL;
+
     @RequestMapping("/app")
     public String app(ModelMap model){
+        model.addAttribute("proxyURL", PROXY_URL);
         return "player";
     }
 

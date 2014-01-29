@@ -28,18 +28,6 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>CrossDomainProxy</servlet-name>
-        <servlet-class>
-            controller.CrossDomainProxy
-        </servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CrossDomainProxy</servlet-name>
-        <url-pattern>/crossDomain</url-pattern>
-    </servlet-mapping>
-
-
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/mvc-dispatcher-servlet.xml</param-value>

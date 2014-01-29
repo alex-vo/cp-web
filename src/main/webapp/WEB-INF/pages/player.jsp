@@ -14,15 +14,7 @@
     <script type="text/javascript" src="js/player.js"></script>
     <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
 
-    <script src="js/id3/binaryfile.js" type="text/javascript"></script>
-    <script src="js/id3/bufferedbinaryajax.js" type="text/javascript"></script>
-    <script src="js/id3/filereader.js" type="text/javascript"></script>
-    <script src="js/id3/id3.js" type="text/javascript"></script>
-    <script src="js/id3/id3v1.js" type="text/javascript"></script>
-    <script src="js/id3/id3v2.js" type="text/javascript"></script>
-    <script src="js/id3/id3v2frames.js" type="text/javascript"></script>
-    <script src="js/id3/id4.js" type="text/javascript"></script>
-    <script src="js/id3/stringutils.js" type="text/javascript"></script>
+    <script src="js/id3-minimized.js" type="text/javascript"></script>
 
     <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.8.20.custom.css"/>
     <link type="text/css" rel="stylesheet" href="css/style.css"/>

@@ -1,6 +1,6 @@
 package controller;
 
-import bo.TrackList;
+import structure.TrackList;
 import ejb.ContentBeanRemote;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;

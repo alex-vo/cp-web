@@ -1,14 +1,11 @@
 package controller;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -17,32 +14,32 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Created with IntelliJ IDEA.
+ * User: vanstr
+ * Date: 14.29.1
+ * Time: 20:52
+ * To change this template use File | Settings | File Templates.
+ */
+@Controller
+public class ProxyController {
 
-public class CrossDomainProxy extends HttpServlet {
+    @Value("#{localProperties['proxy.allowed.domains'].split(',')}")
+    private List<String> allowedDomains;
 
+    final static Logger logger = LoggerFactory.getLogger(ProxyController.class);
 
-    @Value("#{localProperties['proxy.alloweddomains']}")
-    public String allowedDomains;
-
-    final static Logger logger = LoggerFactory.getLogger(CrossDomainProxy.class);
-
-    private ServletContext servletContext;
     private HttpURLConnection con;
     private HttpServletRequest request;
     private HttpServletResponse response;
 
-
-    public void init(ServletConfig servletConfig) throws ServletException {
-        servletContext = servletConfig.getServletContext();
-    }
-
-    public void doGet(HttpServletRequest request, HttpServletResponse response) {
-        doPost(request, response);
-    }
-
-    public void doPost(HttpServletRequest clientRequest, HttpServletResponse webResponse) {
+    @RequestMapping("/crossDomain")
+    public void crossDomainRequest(HttpServletRequest clientRequest, HttpServletResponse webResponse) {
 
         request = clientRequest;
         response = webResponse;
@@ -55,7 +52,7 @@ public class CrossDomainProxy extends HttpServlet {
 
             URL url = getWebUrlFromQuery();
 
-            //checkIsItAllowedURL(url);
+            checkIsItAllowedURL(url);
 
             retransmitClientRequestToWeb(url);
 
@@ -70,19 +67,15 @@ public class CrossDomainProxy extends HttpServlet {
     private void checkIsItAllowedURL(URL url) throws MalformedURLException {
         String urlDomain = url.getHost();
 
-        logger.debug("checkIsItAllowedURL: "+allowedDomains);
+        logger.debug("allowedUrlDomains: " + allowedDomains);
+        logger.debug("requestedUrlDomain:" + urlDomain);
 
-        /*
-        logger.debug(allowedDomains.toString());
-        for(String value: allowedDomains){
-            String allowedDomain = new URL(value).getHost();
-
-            if (allowedDomain.equalsIgnoreCase(urlDomain) ){
+        for (String value : allowedDomains) {
+            if (value.equalsIgnoreCase(urlDomain)) {
                 return;
             }
         }
-        throw new MalformedURLException("URL: " + url + " not allowed");
-        //*/
+        throw new MalformedURLException("URL domain: " + url + " not allowed");
     }
 
     private void retransmitWebResponseToClient() throws IOException {
@@ -97,7 +90,6 @@ public class CrossDomainProxy extends HttpServlet {
     private void retransmitClientRequestToWeb(URL url) throws IOException {
 
         try {
-
             con = (HttpURLConnection) url.openConnection();
 
             con.setRequestMethod(request.getMethod());
@@ -143,7 +135,7 @@ public class CrossDomainProxy extends HttpServlet {
         logger.debug(request.getQueryString());
         String requestLink = request.getQueryString().substring(2);
         URL url = new URL(requestLink);
-        logger.info("Fetching >" + url.toString());
+        logger.info("Request link >" + url.toString());
 
         return url;
     }
@@ -163,6 +155,4 @@ public class CrossDomainProxy extends HttpServlet {
 
         webToProxyBuf.close();
     }
-
-
 }

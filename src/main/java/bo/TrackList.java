@@ -1,5 +1,6 @@
 package bo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,13 +11,20 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TrackList {
-    private List<String> songs;
+    private List<Track> songs;
 
-    public List<String> getSongs() {
+    public TrackList(List<String[]> rawData){
+        this.songs = new ArrayList<Track>();
+        for(String[] currentSongData : rawData){
+            this.songs.add(new Track(currentSongData));
+        }
+    }
+
+    public List<Track> getSongs() {
         return songs;
     }
 
-    public void setSongs(List<String> songs) {
+    public void setSongs(List<Track> songs) {
         this.songs = songs;
     }
 }

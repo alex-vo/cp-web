@@ -12,9 +12,17 @@
     margin-top: 0;
 }
 
-#add-dropbox-button{
+#add-cloud-button{
     position:absolute;
-    left:10%;
+    left:5%;
+    top:5%;
+    color:white
+}
+
+#remove-cloud-button{
+    position:absolute;
+    left:5%;
+    bottom:5%;
     color:white
 }
 
@@ -124,4 +132,13 @@
     position: relative;
     border-radius: 4px;
     left: -4px;
+}
+
+#track-list.waiting{
+    background: #fff;
+    background-image: url("../img/spinner.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 400px;
+    opacity:0.95;
 }

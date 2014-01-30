@@ -48,9 +48,8 @@ public class MusicController {
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            List<String> fileList = bean.getFiles(path, true, (Long) httpSession.getAttribute("user"));
-            TrackList trackList = new TrackList();
-            trackList.setSongs(fileList);
+            List<String[]> fileList = bean.getFiles(path, true, (Long) httpSession.getAttribute("user"));
+            TrackList trackList = new TrackList(fileList);
             return trackList;
         } catch (NamingException ne) {
             ne.printStackTrace();
@@ -61,14 +60,17 @@ public class MusicController {
     }
 
     @RequestMapping("/api/getLink")
-    public @ResponseBody String getFileLink(HttpSession httpSession, @RequestParam("path") String path) {
+    public @ResponseBody String getFileLink(HttpSession httpSession,
+                                            @RequestParam("path") String path,
+                                            @RequestParam("cloud_id") Integer cloudId,
+                                            @RequestParam("file_id") String fileId) {
         try {
             //TODO make static
             RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            String fileLink = bean.getFileSrc(path, (Long) httpSession.getAttribute("user"));
+            String fileLink = bean.getFileSrc(cloudId, path, (Long) httpSession.getAttribute("user"), fileId);
             return fileLink;
         } catch (NamingException ne) {
             ne.printStackTrace();

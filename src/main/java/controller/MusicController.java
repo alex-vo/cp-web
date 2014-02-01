@@ -1,6 +1,6 @@
 package controller;
 
-import bo.TrackList;
+import structure.TrackList;
 import ejb.ContentBeanRemote;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -34,8 +34,12 @@ public class MusicController {
     @Value("#{localProperties['jboss.url']}")
     public String JBOSS_URL;
 
+    @Value("#{localProperties['proxy.url']}")
+    public String PROXY_URL;
+
     @RequestMapping("/app")
     public String app(ModelMap model){
+        model.addAttribute("proxyURL", PROXY_URL);
         return "player";
     }
 

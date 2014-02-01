@@ -1,4 +1,4 @@
-package bo;
+package structure;
 
 /**
  * Created with IntelliJ IDEA.

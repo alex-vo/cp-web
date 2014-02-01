@@ -42,21 +42,7 @@ Player = function() {
             cache: false,
             dataType: 'json',
             success: function(data) {
-                if(data && data["songs"]){
-                    pagePlayer.list = data["songs"];
-                    $('#track-list').empty();
-                    $('#track-list').removeClass("waiting");
-                    for (var i = 0; i < data["songs"].length; i++) {
-                        songData = data["songs"];
-                        var title = data["songs"][i]["name"].substr(data["songs"][i]["name"].lastIndexOf("/") + 1, data["songs"][i]["name"].length);
-                        var s =
-                            '<div class="listed-track">'+
-                                '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
-                                '<span class="track-title">' + title + '</span>  <br/>'+
-                            '</div>';
-                        $('#track-list').append(s);
-                    }
-                }
+                renderTrackList(data);
             }
         });
     };
@@ -64,7 +50,8 @@ Player = function() {
     this.playStop = function(){
         if(!this.current){
             this.current = this.list[0];
-            getSongSource(this.current);
+
+            selectSongByElement(this.current);
         }
         if(this.paused){
             this.playTrack();
@@ -86,7 +73,8 @@ Player = function() {
                 break;
             }
         }
-        getSongSource(this.current);
+        selectSongByElement(this.current);
+
         this.playTrack();
     }
 
@@ -101,28 +89,9 @@ Player = function() {
                 break;
             }
         }
-        getSongSource(this.current);
-        this.playTrack();
-    }
+        selectSongByElement(this.current);
 
-    getSongSource = function(songObject){
-        if(songObject["url"]){
-            $("#jquery_jplayer").jPlayer("setMedia", {
-                mp3: songObject["url"]
-            } );
-        }else{
-            $.ajax({
-                url: "api/getLink?path=" + songObject["name"] + "&cloud_id="
-                    + songObject["cloudId"] + "&file_id=" + songObject["id"],
-                async: false,
-                cache: false,
-                success: function(data){
-                    $("#jquery_jplayer").jPlayer("setMedia", {
-                        mp3: data
-                    } );
-                }
-            });
-        }
+        this.playTrack();
     }
 
     this.playTrack = function(){
@@ -155,9 +124,79 @@ Player = function() {
             this.playStop();
         }else{
             this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
-            getSongSource(this.current);
+            selectSongByElement(this.current);
+            this.getMetadata(obj);
+            console.log(this.current);
             this.playTrack();
         }
+    }
+
+    this.getMetadata = function(songObject){
+        this.current = this.list[$(".listed-track").index($(songObject).closest(".listed-track"))];
+        var songURL = getSongURL(this.current);
+        getSongMetadataByURL(songURL);
+    }
+
+    renderTrackList = function(data){
+        if(data && data["songs"]){
+            pagePlayer.list = data["songs"];
+            $('#track-list').empty();
+            $('#track-list').removeClass("waiting");
+            for (var i = 0; i < data["songs"].length; i++) {                
+                var title = data["songs"][i]["name"].substr(data["songs"][i]["name"].lastIndexOf("/") + 1, data["songs"][i]["name"].length);
+                var s =
+                    '<div class="listed-track">'+
+                        '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
+                        '<span class="track-title">' + title + '</span>  <br/>'+
+                        '</div>';
+                $('#track-list').append(s);
+            }
+        }
+    }
+
+    selectSongByElement = function(element){
+        songUrl = getSongURL(element);
+        selectSongByUrl(songUrl);
+    }
+
+
+    selectSongByUrl = function(songUrl){
+        $("#jquery_jplayer").jPlayer("setMedia", {
+            mp3: songUrl
+        } );        
+    }
+
+
+    getSongURL = function(songObject){
+        var srcURL = "";
+
+        if( songObject["url"]){
+            srcURL = songObject["url"];
+        }else{
+            $.ajax({
+                url: "api/getLink?path=" + songObject["name"] + "&cloud_id="
+                    + songObject["cloudId"] + "&file_id=" + songObject["id"],
+                async: false,
+                cache: false,
+                success: function(data){
+                    srcURL = data; 
+                }
+            });
+        }
+        console.log(srcURL);
+        return srcURL;
+    }
+
+    getSongMetadataByURL = function(songUrl){
+        var songUrlThroughProxy = proxyURL + songUrl;
+        var tags = null;
+
+        ID3.loadTags(songUrlThroughProxy, function(){
+            tags = ID3.getAllTags(songUrlThroughProxy);
+            console.log(tags);
+        });
+
+        return tags;
     }
 };
 

@@ -46,21 +46,31 @@ public class MusicController {
     @RequestMapping("/api/getMusicList")
     public @ResponseBody TrackList getMusicList(HttpSession httpSession,
                                @RequestParam(value = "path", required = false) String path) {
+
+        RemotingManager remotingManager = null;
+        TrackList trackList = null;
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
             List<String[]> fileList = bean.getFiles(path, (Long) httpSession.getAttribute("user"));
-            TrackList trackList = new TrackList(fileList);
-            return trackList;
+            trackList = new TrackList(fileList);
         } catch (NamingException ne) {
+            if(trackList == null){
+                trackList = new TrackList();
+            }
+            trackList.setErrorMessage("Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        return null;
+        return trackList;
     }
 
     @RequestMapping("/api/getLink")
@@ -68,19 +78,26 @@ public class MusicController {
                                             @RequestParam("path") String path,
                                             @RequestParam("cloud_id") Integer cloudId,
                                             @RequestParam("file_id") String fileId) {
+
+        RemotingManager remotingManager = null;
+        String fileLink = null;
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            String fileLink = bean.getFileSrc(cloudId, path, (Long) httpSession.getAttribute("user"), fileId);
-            return fileLink;
+            fileLink = bean.getFileSrc(cloudId, path, (Long) httpSession.getAttribute("user"), fileId);
         } catch (NamingException ne) {
             ne.printStackTrace();
+            fileLink = "Failed to connect the server";
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        return null;
+        return fileLink;
     }
 }

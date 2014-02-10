@@ -30,4 +30,14 @@ public class RemotingManager {
     public Context getContext() {
         return context;
     }
+
+    public void terminate(){
+        if(context != null){
+            try {
+                context.close();
+            } catch (NamingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

@@ -16,6 +16,7 @@
 
 <div id="successMessage"><c:out value="${successMessage}"/></div>
 <div id="errorMessage"><c:out value="${errorMessage}"/></div>
+<div id="serverErrorMessage"><c:out value="${serverErrorMessage}"/></div>
 <form:form modelAttribute="loginForm" method="post" action="login">
     <form:label path="login">Login</form:label> : <form:input type="text" path="login" />
     <form:errors path="login" cssClass="red" /><br/>

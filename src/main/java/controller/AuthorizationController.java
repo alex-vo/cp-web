@@ -76,7 +76,7 @@ public class AuthorizationController {
                 return "redirect:/app";
             }
         } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
@@ -108,12 +108,12 @@ public class AuthorizationController {
                 return "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
             }
         } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
         }
-        return "player";
+        return "redirect:app";
     }
 
     @RequestMapping("/removeDropbox")
@@ -131,7 +131,7 @@ public class AuthorizationController {
                 return "redirect:app";
             }
         } catch (NamingException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
         } finally {
             if(remotingManager != null){
@@ -157,7 +157,7 @@ public class AuthorizationController {
                 return "redirect:app";
             }
         } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
@@ -193,7 +193,7 @@ public class AuthorizationController {
                 return "redirect:app";
             }
         } catch (NamingException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
         } finally {
             if(remotingManager != null){
@@ -219,7 +219,7 @@ public class AuthorizationController {
                 return "redirect:app";
             }
         } catch (NamingException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
         } finally {
             if(remotingManager != null){
@@ -262,7 +262,7 @@ public class AuthorizationController {
                 return "redirect:/welcome";
             }
         } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to connect the server");
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();

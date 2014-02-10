@@ -90,7 +90,7 @@ public class MusicController {
             fileLink = bean.getFileSrc(cloudId, path, (Long) httpSession.getAttribute("user"), fileId);
         } catch (NamingException ne) {
             ne.printStackTrace();
-            fileLink = "Failed to connect the server";
+            fileLink = "error";
         } catch (Exception e){
             e.printStackTrace();
         } finally {

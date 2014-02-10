@@ -33,6 +33,7 @@
 
 <div id="successMessage"><c:out value="${successMessage}"/></div>
 <div id="errorMessage"><c:out value="${errorMessage}"/></div>
+<div id="serverErrorMessage"><c:out value="${serverErrorMessage}"/></div>
 <ul id="add-cloud-button">
     <li><a href="addDropbox">ADD DROPOX</a></li>
     <li><a href="addDrive">ADD GOOGLE DRIVE</a></li>

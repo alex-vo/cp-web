@@ -11,7 +11,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class TrackList {
+    private String errorMessage;
     private List<Track> songs;
+
+    public TrackList(){}
 
     public TrackList(List<String[]> rawData){
         this.songs = new ArrayList<Track>();
@@ -26,5 +29,13 @@ public class TrackList {
 
     public void setSongs(List<Track> songs) {
         this.songs = songs;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }

@@ -57,29 +57,40 @@ public class AuthorizationController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(@Valid @ModelAttribute("loginForm") LoginFormModel loginForm, BindingResult binding,
                         RedirectAttributes redirectAttributes, HttpSession httpSession){
+
+        String result = "redirect:/welcome";
         if (binding.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginForm", binding);
             redirectAttributes.addFlashAttribute("loginForm", loginForm);
             redirectAttributes.addFlashAttribute("successMessage", "Failed to log in");
-            return "redirect:/welcome";
+            return result;
         }
+
+        RemotingManager remotingManager = null;
         try {
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Long userId = bean.login(loginForm.getLogin(), loginForm.getPassword());
             if(userId != null && userId > 0){
                 httpSession.setAttribute("user", userId);
-                return "redirect:/app";
+                result = "redirect:/app";
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "Failed to log in");
             }
         } catch (NamingException ne) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        redirectAttributes.addFlashAttribute("successMessage", "Failed to log in");
-        return "redirect:/welcome";
+
+        return result;
     }
 
     @RequestMapping("/logout")
@@ -89,62 +100,82 @@ public class AuthorizationController {
     }
 
     @RequestMapping("/addDropbox")
-    public String addDropbox(HttpSession httpSession){
+    public String addDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
+        String result = "redirect:app";
+        RemotingManager remotingManager = null;
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             String dropboxUrl = bean.getDropboxAuthLink((Long) httpSession.getAttribute("user"));
             if(dropboxUrl != null){
-                return "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
+                result = "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
             }
         } catch (NamingException ne) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        return "player";
+        return result;
     }
 
     @RequestMapping("/removeDropbox")
     public String removeDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
+
+        RemotingManager remotingManager = null;
         try {
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean removedDropboxAccount = bean.removeDropboxAcoount((Long) httpSession.getAttribute("user"));
             if(removedDropboxAccount){
                 redirectAttributes.addFlashAttribute("successMessage", "Removed Dropbox account");
-                return "redirect:app";
             }
         } catch (NamingException e) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
         return "redirect:app";
     }
 
     @RequestMapping("dropboxAuthComplete")
     public String dropboxAuthComplete(RedirectAttributes redirectAttributes, HttpSession httpSession){
+
+        RemotingManager remotingManager = null;
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean retrievedToken = bean.retrieveDropboxAccessToken((Long) httpSession.getAttribute("user"));
             if(retrievedToken){
                 redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
-                return "redirect:app";
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
             }
         } catch (NamingException ne) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
         return "redirect:app";
     }
 
@@ -158,18 +189,24 @@ public class AuthorizationController {
 
     @RequestMapping("/removeDrive")
     public String removeDrive(RedirectAttributes redirectAttributes, HttpSession httpSession){
+
+        RemotingManager remotingManager = null;
         try {
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean removedDriveAccount = bean.removeGDriveAccount((Long) httpSession.getAttribute("user"));
             if(removedDriveAccount){
                 redirectAttributes.addFlashAttribute("successMessage", "Removed Google Drive account");
-                return "redirect:app";
             }
         } catch (NamingException e) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
         return "redirect:app";
     }
@@ -178,20 +215,26 @@ public class AuthorizationController {
     public String driveAuthComplete(@RequestParam(value = "code") String code,
                                     RedirectAttributes redirectAttributes,
                                     HttpSession httpSession){
+        RemotingManager remotingManager = null;
         try {
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
             if(retrievedCredentials){
                 redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
-                return "redirect:app";
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
             }
         } catch (NamingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
+            e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
         return "redirect:app";
     }
 
@@ -213,23 +256,30 @@ public class AuthorizationController {
             redirectAttributes.addFlashAttribute("registerForm", registerFormModel);
             return "redirect:registerForm";
         }
+
+        RemotingManager remotingManager = null;
         try {
             //TODO make static
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
             Boolean registered = bean.registerUser(registerFormModel.getLogin(), registerFormModel.getPassword());
             if(registered){
                 redirectAttributes.addFlashAttribute("successMessage", "Registration completed successfully");
-                return "redirect:/welcome";
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "Failed to register");
             }
         } catch (NamingException ne) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        redirectAttributes.addFlashAttribute("errorMessage", "Failed to register");
         return "redirect:welcome";
     }
 }

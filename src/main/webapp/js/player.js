@@ -123,18 +123,23 @@ Player = function() {
         if(this.current == this.list[$(".listed-track").index($(obj).closest(".listed-track"))]){
             this.playStop();
         }else{
-            this.current = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
-            selectSongByElement(this.current);
-            this.getMetadata(obj);
-            console.log(this.current);
-            this.playTrack();
+            clickedObject = this.list[$(".listed-track").index($(obj).closest(".listed-track"))];
+            selectSongByElement(clickedObject);
+            if(clickedObject["url"]){
+                this.current = clickedObject;
+                this.getMetadata(obj);
+                console.log(this.current);
+                this.playTrack();
+            }
         }
     }
 
     this.getMetadata = function(songObject){
         this.current = this.list[$(".listed-track").index($(songObject).closest(".listed-track"))];
         var songURL = getSongURL(this.current);
-        getSongMetadataByURL(songURL);
+        if(songURL){
+            getSongMetadataByURL(songURL);
+        }
     }
 
     renderTrackList = function(data){
@@ -151,12 +156,17 @@ Player = function() {
                         '</div>';
                 $('#track-list').append(s);
             }
+        }else if(data && data["errorMessage"]){
+            $("#errorMessage").text(data["errorMessage"]);
         }
     }
 
     selectSongByElement = function(element){
         songUrl = getSongURL(element);
-        selectSongByUrl(songUrl);
+        if(songUrl){
+            element["url"] = songUrl;
+            selectSongByUrl(songUrl);
+        }
     }
 
 
@@ -179,7 +189,14 @@ Player = function() {
                 async: false,
                 cache: false,
                 success: function(data){
-                    srcURL = data; 
+                    if(data == "error"){
+                        $("#errorMessage").text("Failed to connect the server");
+                    }else{
+                        srcURL = data;
+                    }
+                },
+                error: function(data){
+                   $("#errorMessage").text("Failed to connect the server");
                 }
             });
         }

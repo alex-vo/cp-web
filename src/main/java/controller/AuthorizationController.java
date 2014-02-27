@@ -184,7 +184,8 @@ public class AuthorizationController {
         return "redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri="
                 + DRIVE_REDIRECT_URI
                 + "&response_type=code&client_id=" + DRIVE_CLIENT_ID
-                + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
+                + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive"
+                + "+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&approval_prompt=force&access_type=offline";
     }
 
     @RequestMapping("/removeDrive")
@@ -281,5 +282,10 @@ public class AuthorizationController {
             }
         }
         return "redirect:welcome";
+    }
+
+    @RequestMapping("/signInDrive")
+    public String signInDrive(){
+        return "redirect:app";
     }
 }

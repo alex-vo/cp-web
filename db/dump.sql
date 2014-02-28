@@ -26,8 +26,12 @@ CREATE TABLE `user` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `login` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `dropbox_token` varchar(255) DEFAULT NULL,
-  `dropbox_secret` varchar(255) DEFAULT NULL,
+  `dropbox_access_key` varchar(255) DEFAULT NULL,
+  `dropbox_access_secret` varchar(255) DEFAULT NULL,
+  `dropbox_request_key` varchar(255) DEFAULT NULL,
+  `dropbox_request_secret` varchar(255) DEFAULT NULL,
+  `drive_access_token` varchar(255) DEFAULT NULL,
+  `drive_refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -38,7 +42,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'alex','123','clu6znxvdtpw8rb','jianqdabhb84gd4');
+INSERT INTO `user` VALUES (1, 'alex', '123', '', '', '', '', '', '');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

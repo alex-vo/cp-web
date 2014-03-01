@@ -25,6 +25,7 @@
     <button>Login</button><br/>
 </form:form>
 
+<a href="addDrive">Sign in with Google</a><br/>
 <a href="registerForm">Register</a>
 
 </body>

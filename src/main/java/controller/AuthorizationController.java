@@ -222,12 +222,23 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
-            if(retrievedCredentials){
-                redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
+            if(httpSession.getAttribute("user") != null){
+                Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
+                if(retrievedCredentials){
+                    redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
+                }
             }else{
-                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
+                Long userId = bean.authorizeWithDrive(code);
+                if(userId != null){
+                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google account");
+                    httpSession.setAttribute("user", userId);
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google account");
+                }
             }
+
         } catch (NamingException e) {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();
@@ -285,7 +296,30 @@ public class AuthorizationController {
     }
 
     @RequestMapping("/signInDrive")
-    public String signInDrive(){
+    public String signInDrive(@RequestParam(value = "code") String code,
+                              RedirectAttributes redirectAttributes,
+                              HttpSession httpSession){
+        RemotingManager remotingManager = null;
+        try {
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
+                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            Long userId = bean.authorizeWithDrive(code) ;
+            if(userId != null){
+                redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google account");
+                httpSession.setAttribute("user", userId);
+            }else{
+                redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google account");
+            }
+        } catch (NamingException e) {
+            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
+            e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
+        }
         return "redirect:app";
     }
 }

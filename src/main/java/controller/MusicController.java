@@ -1,7 +1,8 @@
 package controller;
 
-import structure.TrackList;
 import ejb.ContentBeanRemote;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import remote.RemotingManager;
+import structure.PlayList;
+import structure.Song;
+import structure.TrackList;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -25,6 +29,8 @@ import java.util.List;
 @Controller
 public class MusicController {
 
+    final static Logger logger = LoggerFactory.getLogger(MusicController.class);
+
     @Value("#{localProperties['jboss.login']}")
     public String JBOSS_LOGIN;
 
@@ -40,6 +46,27 @@ public class MusicController {
     @RequestMapping("/app")
     public String app(ModelMap model){
         model.addAttribute("proxyURL", PROXY_URL);
+        return "player";
+    }
+
+    @RequestMapping("/getPlayList")
+    public String testGetPlayList(HttpSession httpSession) {
+        try {
+
+            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            ContentBeanRemote bean = (ContentBeanRemote) context
+                    .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
+            PlayList playList = bean.getPlayList( (Long) httpSession.getAttribute("user"));
+            for(Song song:playList){
+                logger.info("Song:" +song);
+            }
+
+        } catch (NamingException ne) {
+            ne.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return "player";
     }
 

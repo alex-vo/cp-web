@@ -142,3 +142,16 @@
     height: 400px;
     opacity:0.95;
 }
+
+.metadata{
+    position: relative;
+    vertical-align: middle;
+    color: grey;
+    font-family: arial,helvetica,sans-serif;
+    font-size: 10px;
+}
+
+.metadataRefreshButton{
+    color: white;
+    font-family: arial,helvetica,sans-serif;
+}

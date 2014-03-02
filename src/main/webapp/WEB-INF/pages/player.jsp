@@ -63,8 +63,6 @@
 </audio>
 <script type="text/javascript">
 
-    var proxyURL = "<c:out value="${proxyURL}"/>";
-
     $(document).ready(function() {
         var audio = document.getElementById('player');
         pagePlayer = new Player();

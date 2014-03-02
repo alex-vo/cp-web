@@ -40,35 +40,37 @@ public class MusicController {
     @Value("#{localProperties['jboss.url']}")
     public String JBOSS_URL;
 
-    @Value("#{localProperties['proxy.url']}")
-    public String PROXY_URL;
-
     @RequestMapping("/app")
     public String app(ModelMap model){
-        model.addAttribute("proxyURL", PROXY_URL);
         return "player";
     }
 
-    @RequestMapping("/getPlayList")
-    public String testGetPlayList(HttpSession httpSession) {
-        try {
+    @RequestMapping("/api/getPlayList")
+    public @ResponseBody PlayList getPlayList(HttpSession httpSession) {
 
-            RemotingManager remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+        RemotingManager remotingManager = null;
+        PlayList playList = null;
+        try {
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            PlayList playList = bean.getPlayList( (Long) httpSession.getAttribute("user"));
+            playList = bean.getPlayList((Long) httpSession.getAttribute("user"));
             for(Song song:playList){
                 logger.info("Song:" +song);
             }
-
         } catch (NamingException ne) {
             ne.printStackTrace();
-        } catch (Exception e) {
+        } catch (Exception e){
             e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
-        return "player";
+        return playList;
     }
+
 
     @RequestMapping("/api/getMusicList")
     public @ResponseBody TrackList getMusicList(HttpSession httpSession,
@@ -88,6 +90,7 @@ public class MusicController {
             if(trackList == null){
                 trackList = new TrackList();
             }
+            // TODO: Don't like that trackList also is responsible for message delivery
             trackList.setErrorMessage("Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){

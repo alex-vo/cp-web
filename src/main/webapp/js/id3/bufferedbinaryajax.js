@@ -32,7 +32,8 @@ var BufferedBinaryAjax = function(strUrl, fncCallback, fncError) {
 					oHTTP.onload = function() {
 
 						if (oHTTP.status == "200" || oHTTP.status == "206") {
-							oHTTP.fileSize = iFileSize || oHTTP.getResponseHeader("Content-Length");
+                            // Doesnot work with cross domain oHTTP.fileSize = iFileSize || oHTTP.getResponseHeader("Content-Length");
+                            oHTTP.fileSize = iFileSize;
 							fncCallback(oHTTP);
 						} else {
 							if (fncError) fncError();
@@ -171,7 +172,9 @@ var BufferedBinaryAjax = function(strUrl, fncCallback, fncError) {
             sendRequest(
                 strUrl,
                 function(http) {
-                    var size = parseInt(http.getResponseHeader("Content-Length"), 10);
+                    //* When it is cross domain, we could not get Content-Length, file size is hardcoded.
+                    //var size = parseInt(http.getResponseHeader("Content-Length"), 10);
+                    var size = 123;
                     // Range header not supported
                     if( size == iLength ) {
                         blockRange[0] = 0;
@@ -179,6 +182,7 @@ var BufferedBinaryAjax = function(strUrl, fncCallback, fncError) {
                         range[0] = 0;
                         range[1] = iLength-1;
                     }
+
                     var block = {
                         data: http.responseBody || http.responseText,
                         offset: range[0]

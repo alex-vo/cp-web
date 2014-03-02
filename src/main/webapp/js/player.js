@@ -130,7 +130,6 @@ Player = function () {
             selectSongByElement(clickedObject);
             if (clickedObject["url"]) {
                 this.current = clickedObject;
-                //this.getMetadata(obj);
                 this.playTrack();
             }
         }
@@ -142,24 +141,34 @@ Player = function () {
         var trackNumber = $(".listed-track").index($(songHtmlElement).closest(".listed-track"));
 
         this.current = this.list[trackNumber];
-        if (this.current["metadata"] == null) {
-            requestSongMetadata(this.current, function(songObj){
-                // need to white while metadata not get
-                updateVisibleMetadata(songObj, songHtmlElement);
-            });
-        }else{
-            updateVisibleMetadata(this.current, songHtmlElement);
-        }
 
+        requestSongMetadata(this.current, function (songObj) {
+            // need to white while metadata not get
+            updateVisibleMetadata(songObj, songHtmlElement);
+            saveMetadataToServer(songObj);
+        });
 
     }
 
-    updateVisibleMetadata = function(songObj, songHtmlElement) {
+    updateVisibleMetadata = function (songObj, songHtmlElement) {
 
         $metadataHtml = renderSongMetadata(songObj);
         $(songHtmlElement).closest(".listed-track").find(".metadata").html($metadataHtml);
 
     }
+
+    saveMetadataToServer = function (songObj) {
+        var url = 'api/saveSongMetadata?jsonSongObject=' + JSON.stringify(songObj);
+        $.ajax({
+            url: url,
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                // TODO process error
+                console.log(data);
+            }
+        });
+    };
 
     renderPlayList = function (data) {
         if (data) {

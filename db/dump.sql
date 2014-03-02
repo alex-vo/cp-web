@@ -30,6 +30,7 @@ CREATE TABLE `user` (
   `dropbox_access_secret` varchar(255) DEFAULT NULL,
   `dropbox_request_key` varchar(255) DEFAULT NULL,
   `dropbox_request_secret` varchar(255) DEFAULT NULL,
+  `dropbox_uid` bigint(20) UNIQUE DEFAULT NULL,
   `drive_access_token` varchar(255) DEFAULT NULL,
   `drive_refresh_token` varchar(255) DEFAULT NULL,
   `google_email` varchar(255) UNIQUE DEFAULT NULL,

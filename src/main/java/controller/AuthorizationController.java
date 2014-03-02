@@ -19,6 +19,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -109,7 +110,15 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            String dropboxUrl = bean.getDropboxAuthLink((Long) httpSession.getAttribute("user"));
+            String dropboxUrl = null;
+            Long userId = null;
+            if(httpSession.getAttribute("user") == null){
+                userId = bean.createNewUserWithDropbox();
+                httpSession.setAttribute("user", userId);
+            }else {
+                userId = (Long) httpSession.getAttribute("user");
+            }
+            dropboxUrl = bean.getDropboxAuthLink(userId);
             if(dropboxUrl != null){
                 result = "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
             }
@@ -232,10 +241,10 @@ public class AuthorizationController {
             }else{
                 Long userId = bean.authorizeWithDrive(code);
                 if(userId != null){
-                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google account");
+                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google");
                     httpSession.setAttribute("user", userId);
                 }else{
-                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google account");
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google");
                 }
             }
 
@@ -293,33 +302,5 @@ public class AuthorizationController {
             }
         }
         return "redirect:welcome";
-    }
-
-    @RequestMapping("/signInDrive")
-    public String signInDrive(@RequestParam(value = "code") String code,
-                              RedirectAttributes redirectAttributes,
-                              HttpSession httpSession){
-        RemotingManager remotingManager = null;
-        try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Long userId = bean.authorizeWithDrive(code) ;
-            if(userId != null){
-                redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google account");
-                httpSession.setAttribute("user", userId);
-            }else{
-                redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google account");
-            }
-        } catch (NamingException e) {
-            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
-            e.printStackTrace();
-        } finally {
-            if(remotingManager != null){
-                remotingManager.terminate();
-            }
-        }
-        return "redirect:app";
     }
 }

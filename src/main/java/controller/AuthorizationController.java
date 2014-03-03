@@ -31,8 +31,11 @@ import java.util.Map;
 @Controller
 public class AuthorizationController {
 
-    @Value("#{localProperties['dropbox.callback.url']}")
-    public String DROPBOX_CALLBACK_URL;
+    @Value("#{localProperties['dropbox.redirect.uri']}")
+    public String DROPBOX_REDIRECT_URI;
+
+    @Value("#{localProperties['dropbox.client.id']}")
+    public String DROPBOX_CLIENT_ID;
 
     @Value("#{localProperties['drive.redirect.uri']}")
     public String DRIVE_REDIRECT_URI;
@@ -102,37 +105,9 @@ public class AuthorizationController {
 
     @RequestMapping("/addDropbox")
     public String addDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
-        String result = "redirect:app";
-        RemotingManager remotingManager = null;
-        try {
-            //TODO make static
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            String dropboxUrl = null;
-            Long userId = null;
-            if(httpSession.getAttribute("user") == null){
-                userId = bean.createNewUserWithDropbox();
-                httpSession.setAttribute("user", userId);
-            }else {
-                userId = (Long) httpSession.getAttribute("user");
-            }
-            dropboxUrl = bean.getDropboxAuthLink(userId);
-            if(dropboxUrl != null){
-                result = "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
-            }
-        } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
-            ne.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            if(remotingManager != null){
-                remotingManager.terminate();
-            }
-        }
-        return result;
+        return "redirect:https://www.dropbox.com/1/oauth2/authorize?client_id="
+                + DROPBOX_CLIENT_ID + "&response_type=code&redirect_uri="
+                + DROPBOX_REDIRECT_URI;
     }
 
     @RequestMapping("/removeDropbox")
@@ -160,7 +135,9 @@ public class AuthorizationController {
     }
 
     @RequestMapping("dropboxAuthComplete")
-    public String dropboxAuthComplete(RedirectAttributes redirectAttributes, HttpSession httpSession){
+    public String dropboxAuthComplete(@RequestParam(value = "code") String code,
+                                      RedirectAttributes redirectAttributes,
+                                      HttpSession httpSession){
 
         RemotingManager remotingManager = null;
         try {
@@ -169,11 +146,21 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Boolean retrievedToken = bean.retrieveDropboxAccessToken((Long) httpSession.getAttribute("user"));
-            if(retrievedToken){
-                redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
+            if(httpSession.getAttribute("user") != null){
+                Boolean retrievedCredentials = bean.retrieveDropboxCredentials((Long) httpSession.getAttribute("user"), code);
+                if(retrievedCredentials){
+                    redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
+                }
             }else{
-                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
+                Long userId = bean.authorizeWithDropbox(code);
+                if(userId != null){
+                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Dropbox");
+                    httpSession.setAttribute("user", userId);
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Dropbox");
+                }
             }
         } catch (NamingException ne) {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");

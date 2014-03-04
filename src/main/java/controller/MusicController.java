@@ -1,5 +1,6 @@
 package controller;
 
+import commons.CloudFile;
 import structure.TrackList;
 import ejb.ContentBeanRemote;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,20 +49,21 @@ public class MusicController {
                                @RequestParam(value = "path", required = false) String path) {
 
         RemotingManager remotingManager = null;
-        TrackList trackList = null;
+//        TrackList trackList = null;
+        TrackList fileList = null;
         try {
             //TODO make static
             remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            List<String[]> fileList = bean.getFiles(path, (Long) httpSession.getAttribute("user"));
-            trackList = new TrackList(fileList);
+            List<CloudFile> cloudFiles = bean.getFiles(path, (Long) httpSession.getAttribute("user"));
+            fileList = new TrackList(cloudFiles);
+//            trackList = new TrackList(fileList);
         } catch (NamingException ne) {
-            if(trackList == null){
-                trackList = new TrackList();
+            if(fileList == null){
+                fileList = new TrackList("Failed to connect the server");
             }
-            trackList.setErrorMessage("Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
             e.printStackTrace();
@@ -70,7 +72,7 @@ public class MusicController {
                 remotingManager.terminate();
             }
         }
-        return trackList;
+        return fileList;
     }
 
     @RequestMapping("/api/getLink")

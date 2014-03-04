@@ -1,5 +1,7 @@
 package structure;
 
+import commons.CloudFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,22 +14,22 @@ import java.util.List;
  */
 public class TrackList {
     private String errorMessage;
-    private List<Track> songs;
+    private List<CloudFile> songs;
+    //TODO expires
 
-    public TrackList(){}
-
-    public TrackList(List<String[]> rawData){
-        this.songs = new ArrayList<Track>();
-        for(String[] currentSongData : rawData){
-            this.songs.add(new Track(currentSongData));
-        }
+    public TrackList(String errorMessage){
+        this.errorMessage = errorMessage;
     }
 
-    public List<Track> getSongs() {
+    public TrackList(List<CloudFile> data){
+        this.songs = data;
+    }
+
+    public List<CloudFile> getSongs() {
         return songs;
     }
 
-    public void setSongs(List<Track> songs) {
+    public void setSongs(List<CloudFile> songs) {
         this.songs = songs;
     }
 

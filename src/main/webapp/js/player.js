@@ -36,7 +36,7 @@ Player = function() {
     });
 
     this.getTrackList = function() {
-        var url = 'api/getMusicList?path=';
+        var url = 'api/getMusicList?path=/';
         $.ajax({
             url: url,
             cache: false,

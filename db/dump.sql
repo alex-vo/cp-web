@@ -27,13 +27,11 @@ CREATE TABLE `user` (
   `login` varchar(255) UNIQUE DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `dropbox_access_key` varchar(255) DEFAULT NULL,
-  `dropbox_access_secret` varchar(255) DEFAULT NULL,
-  `dropbox_request_key` varchar(255) DEFAULT NULL,
-  `dropbox_request_secret` varchar(255) DEFAULT NULL,
-  `dropbox_uid` varchar(255) UNIQUE DEFAULT NULL,
   `drive_access_token` varchar(255) DEFAULT NULL,
   `drive_refresh_token` varchar(255) DEFAULT NULL,
   `google_email` varchar(255) UNIQUE DEFAULT NULL,
+  `dropbox_uid` varchar(255) UNIQUE DEFAULT NULL,
+  `drive_token_expires` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

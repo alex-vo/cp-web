@@ -15,7 +15,6 @@ import java.util.List;
 public class TrackList {
     private String errorMessage;
     private List<CloudFile> songs;
-    //TODO expires
 
     public TrackList(String errorMessage){
         this.errorMessage = errorMessage;

@@ -49,8 +49,7 @@ public class MusicController {
                                @RequestParam(value = "path", required = false) String path) {
 
         RemotingManager remotingManager = null;
-//        TrackList trackList = null;
-        TrackList fileList = null;
+        TrackList trackList = null;
         try {
             //TODO make static
             remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
@@ -58,11 +57,10 @@ public class MusicController {
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
             List<CloudFile> cloudFiles = bean.getFiles(path, (Long) httpSession.getAttribute("user"));
-            fileList = new TrackList(cloudFiles);
-//            trackList = new TrackList(fileList);
+            trackList = new TrackList(cloudFiles);
         } catch (NamingException ne) {
-            if(fileList == null){
-                fileList = new TrackList("Failed to connect the server");
+            if(trackList == null){
+                trackList = new TrackList("Failed to connect the server");
             }
             ne.printStackTrace();
         } catch (Exception e){
@@ -72,7 +70,7 @@ public class MusicController {
                 remotingManager.terminate();
             }
         }
-        return fileList;
+        return trackList;
     }
 
     @RequestMapping("/api/getLink")

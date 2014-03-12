@@ -258,8 +258,8 @@ Player = function () {
         var url = "";
         $.ajax({
             // TODO: do not send driveID if it is Dropbox
-            url: "api/getLink?path=" + songObject["filePath"] + "&cloud_id="
-                + songObject["cloudId"] + "&file_id=" + songObject["driveId"],
+            //url: "api/getLink?path=" + songObject["filePath"] + "&cloud_id=" + songObject["cloudId"] + "&file_id=" + songObject["driveId"],
+            url: "api/getLink?cloud_id=" + songObject["cloudId"] + "&file_id=" + songObject["fileId"] ,
             async: false,
             cache: false,
             success: function (data) {

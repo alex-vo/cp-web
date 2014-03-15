@@ -52,6 +52,12 @@ public class AuthorizationController {
     @Value("#{localProperties['jboss.url']}")
     public String JBOSS_URL;
 
+    @Value("#{localProperties['dropbox.auth.link']}")
+    private String DROPBOX_AUTH_LINK;
+
+    @Value("#{localProperties['drive.auth.link']}")
+    private String DRIVE_AUTH_LINK;
+
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
         if(!model.containsAttribute("loginForm")) model.addAttribute("loginForm", new LoginFormModel());
@@ -105,9 +111,7 @@ public class AuthorizationController {
 
     @RequestMapping("/addDropbox")
     public String addDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
-        return "redirect:https://www.dropbox.com/1/oauth2/authorize?client_id="
-                + DROPBOX_CLIENT_ID + "&response_type=code&redirect_uri="
-                + DROPBOX_REDIRECT_URI;
+        return "redirect:" + DROPBOX_AUTH_LINK;
     }
 
     @RequestMapping("/removeDropbox")
@@ -177,11 +181,7 @@ public class AuthorizationController {
 
     @RequestMapping("/addDrive")
     public String addGDrive(HttpSession httpSession){
-        return "redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri="
-                + DRIVE_REDIRECT_URI
-                + "&response_type=code&client_id=" + DRIVE_CLIENT_ID
-                + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive"
-                + "+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&approval_prompt=force&access_type=offline";
+        return "redirect:" + DRIVE_AUTH_LINK;
     }
 
     @RequestMapping("/removeDrive")

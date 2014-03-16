@@ -30,8 +30,11 @@ import javax.validation.Valid;
 @Controller
 public class AuthorizationController {
 
-    @Value("#{localProperties['dropbox.callback.url']}")
-    public String DROPBOX_CALLBACK_URL;
+    @Value("#{localProperties['dropbox.redirect.uri']}")
+    public String DROPBOX_REDIRECT_URI;
+
+    @Value("#{localProperties['dropbox.client.id']}")
+    public String DROPBOX_CLIENT_ID;
 
     @Value("#{localProperties['drive.redirect.uri']}")
     public String DRIVE_REDIRECT_URI;
@@ -47,6 +50,12 @@ public class AuthorizationController {
 
     @Value("#{localProperties['jboss.url']}")
     public String JBOSS_URL;
+
+    @Value("#{localProperties['dropbox.auth.link']}")
+    private String DROPBOX_AUTH_LINK;
+
+    @Value("#{localProperties['drive.auth.link']}")
+    private String DRIVE_AUTH_LINK;
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
@@ -101,29 +110,7 @@ public class AuthorizationController {
 
     @RequestMapping("/addDropbox")
     public String addDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
-        String result = "redirect:app";
-        RemotingManager remotingManager = null;
-        try {
-            //TODO make static
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            String dropboxUrl = bean.getDropboxAuthLink((Long) httpSession.getAttribute("user"));
-            if(dropboxUrl != null){
-                result = "redirect:" + dropboxUrl + "&oauth_callback=" + DROPBOX_CALLBACK_URL; //TODO move this to core
-            }
-        } catch (NamingException ne) {
-            redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
-            ne.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            if(remotingManager != null){
-                remotingManager.terminate();
-            }
-        }
-        return result;
+        return "redirect:" + DROPBOX_AUTH_LINK;
     }
 
     @RequestMapping("/removeDropbox")
@@ -151,7 +138,9 @@ public class AuthorizationController {
     }
 
     @RequestMapping("dropboxAuthComplete")
-    public String dropboxAuthComplete(RedirectAttributes redirectAttributes, HttpSession httpSession){
+    public String dropboxAuthComplete(@RequestParam(value = "code") String code,
+                                      RedirectAttributes redirectAttributes,
+                                      HttpSession httpSession){
 
         RemotingManager remotingManager = null;
         try {
@@ -160,11 +149,21 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Boolean retrievedToken = bean.retrieveDropboxAccessToken((Long) httpSession.getAttribute("user"));
-            if(retrievedToken){
-                redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
+            if(httpSession.getAttribute("user") != null){
+                Boolean retrievedCredentials = bean.retrieveDropboxCredentials((Long) httpSession.getAttribute("user"), code);
+                if(retrievedCredentials){
+                    redirectAttributes.addFlashAttribute("successMessage", "Added Dropbox account");
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
+                }
             }else{
-                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Dropbox account");
+                Long userId = bean.authorizeWithDropbox(code);
+                if(userId != null){
+                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Dropbox");
+                    httpSession.setAttribute("user", userId);
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Dropbox");
+                }
             }
         } catch (NamingException ne) {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
@@ -181,10 +180,7 @@ public class AuthorizationController {
 
     @RequestMapping("/addDrive")
     public String addGDrive(HttpSession httpSession){
-        return "redirect:https://accounts.google.com/o/oauth2/auth?redirect_uri="
-                + DRIVE_REDIRECT_URI
-                + "&response_type=code&client_id=" + DRIVE_CLIENT_ID
-                + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&approval_prompt=force&access_type=offline";
+        return "redirect:" + DRIVE_AUTH_LINK;
     }
 
     @RequestMapping("/removeDrive")
@@ -221,12 +217,23 @@ public class AuthorizationController {
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
                     .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
-            Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
-            if(retrievedCredentials){
-                redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
+            if(httpSession.getAttribute("user") != null){
+                Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
+                if(retrievedCredentials){
+                    redirectAttributes.addFlashAttribute("successMessage", "Added Google Drive account");
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
+                }
             }else{
-                redirectAttributes.addFlashAttribute("errorMessage", "Failed to add Google Drive account");
+                Long userId = bean.authorizeWithDrive(code);
+                if(userId != null){
+                    redirectAttributes.addFlashAttribute("successMessage", "Signed in with Google");
+                    httpSession.setAttribute("user", userId);
+                }else{
+                    redirectAttributes.addFlashAttribute("errorMessage", "Failed to sign in with Google");
+                }
             }
+
         } catch (NamingException e) {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             e.printStackTrace();

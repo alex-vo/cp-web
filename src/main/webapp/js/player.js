@@ -1,6 +1,6 @@
 // playerObj should be standart JS DOM instance
 var songData = new Array();
-Player = function () {
+Player = function() {
     this.list = new Array("Kalimba.mp3", "Maid with the Flaxen Hair.mp3");
     this.current = null;
     this.paused = true;
@@ -9,7 +9,7 @@ Player = function () {
         swfPath: "js/Jplayer.swf",
         supplied: "mp3",
         volume: 1,
-        wmode: "window",
+        wmode:"window",
         solution: "html,flash",
         errorAlerts: true,
         warningAlerts: false,
@@ -18,7 +18,7 @@ Player = function () {
         }
     });
 
-    $("#jquery_jplayer").bind($.jPlayer.event.timeupdate, function () {
+    $("#jquery_jplayer").bind($.jPlayer.event.timeupdate, function() {
         var left = (($("#jquery_jplayer").data("jPlayer").status.currentTime
             / $("#jquery_jplayer").data("jPlayer").status.duration) * $("#progress-indicator").parent().width()) - 4;
         $("#progress-indicator").css('left', left);
@@ -26,8 +26,8 @@ Player = function () {
     var dragStart = $("#progress-indicator").parent().offset().left - 4;
     var dragFinish = dragStart + $("#progress-indicator").parent().width();
     //TODO draggable - incorrect progress
-    $("#progress-indicator").draggable({ axis: "x", containment: [dragStart, 0, dragFinish, 0],
-        stop: function () {
+    $("#progress-indicator").draggable({ axis: "x", containment: [dragStart,0,dragFinish,0],
+        stop: function() {
             var offset = ($("#progress-indicator").offset().left
                 - $("#progress-indicator").parent().offset().left + 4) / $("#progress-indicator").parent().width();
             var time = $("#jquery_jplayer").data("jPlayer").status.duration * offset;
@@ -49,27 +49,27 @@ Player = function () {
         });
     };
 
-    this.playStop = function () {
-        if (!this.current) {
+    this.playStop = function(){
+        if(!this.current){
             this.current = this.list[0];
 
             selectSongByElement(this.current);
         }
-        if (this.paused) {
+        if(this.paused){
             this.playTrack();
-        } else {
+        }else{
             this.pauseTrack();
         }
     }
 
     this.getPlayList();
 
-    this.next = function () {
-        for (var i = 0; i < this.list.length; i++) {
-            if (this.current == this.list[i]) {
-                if (i == this.list.length - 1) {
+    this.next = function(){
+        for(var i = 0; i < this.list.length; i++){
+            if(this.current == this.list[i]){
+                if(i == this.list.length - 1){
                     this.current = this.list[0];
-                } else {
+                }else{
                     this.current = this.list[i + 1];
                 }
                 break;
@@ -80,12 +80,12 @@ Player = function () {
         this.playTrack();
     }
 
-    this.prev = function () {
-        for (var i = 0; i < this.list.length; i++) {
-            if (this.current == this.list[i]) {
-                if (i == 0) {
+    this.prev = function(){
+        for(var i = 0; i < this.list.length; i++){
+            if(this.current == this.list[i]){
+                if(i == 0){
                     this.current = this.list[this.list.length - 1];
-                } else {
+                }else{
                     this.current = this.list[i - 1];
                 }
                 break;
@@ -96,7 +96,7 @@ Player = function () {
         this.playTrack();
     }
 
-    this.playTrack = function () {
+    this.playTrack = function(){
         this.paused = false;
         $("#button-play-pause").attr('class', 'button-pause-big');
         $(".pause-small").attr("class", "play-small");
@@ -106,17 +106,17 @@ Player = function () {
                 $(this).find(".play-small").attr("class", "pause-small");
             }
         });
-        if (songName) {
+        if(songName){
             $("#track-name").text(songName);
             $("#jquery_jplayer").jPlayer("play");
         }
     }
 
-    this.pauseTrack = function () {
+    this.pauseTrack = function(){
         this.paused = true;
         $("#button-play-pause").attr('class', 'button-play-big');
         $(".pause-small").attr("class", "play-small");
-        if ($("#jquery_jplayer").data("jPlayer").status.src) {
+        if($("#jquery_jplayer").data("jPlayer").status.src){
             $("#jquery_jplayer").jPlayer("pause");
         }
     }
@@ -133,8 +133,6 @@ Player = function () {
                 this.playTrack();
             }
         }
-        console.log(trackNumber);
-        console.log(this);
     }
 
     this.getMetadata = function (songHtmlElement) {
@@ -179,6 +177,8 @@ Player = function () {
                 var songElement = renderSongElement(data[i]);
                 $('#track-list').append(songElement);
             }
+        }else if(data && data["errorMessage"]){
+            $("#errorMessage").text(data["errorMessage"]);
         }
     }
     renderSongElement = function (song) {
@@ -227,24 +227,24 @@ Player = function () {
 
     selectSongByElement = function (element) {
         songUrl = getSongURL(element);
-        if (songUrl) {
+        if(songUrl){
             element["url"] = songUrl;
             selectSongByUrl(songUrl);
         }
     }
 
 
-    selectSongByUrl = function (songUrl) {
+    selectSongByUrl = function(songUrl){
         $("#jquery_jplayer").jPlayer("setMedia", {
             mp3: songUrl
-        });
+        } );        
     }
 
 
-    getSongURL = function (songObject) {
+    getSongURL = function(songObject){
         var srcURL = "";
 
-        if (songObject["url"]) {
+        if( songObject["url"]){
             srcURL = songObject["url"];
         } else {
             srcURL = requestSongUrl(songObject);
@@ -285,7 +285,6 @@ Player = function () {
             console.log(songObj["metadata"]);
             callback(songObj);
         });
-
     }
 };
 

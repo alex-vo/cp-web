@@ -1,5 +1,6 @@
 package controller;
 
+
 import com.google.gson.Gson;
 import ejb.ContentBeanRemote;
 import org.slf4j.Logger;
@@ -13,12 +14,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import remote.RemotingManager;
 import structure.PlayList;
 import structure.Song;
-import structure.TrackList;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -111,40 +110,8 @@ public class MusicController {
     }
 
 
-    @RequestMapping("/api/getMusicList")
-    public @ResponseBody TrackList getMusicList(HttpSession httpSession,
-                               @RequestParam(value = "path", required = false) String path) {
-
-        RemotingManager remotingManager = null;
-        TrackList trackList = null;
-        try {
-            //TODO make static
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            ContentBeanRemote bean = (ContentBeanRemote) context
-                    .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            List<String[]> fileList = bean.getFiles(path, (Long) httpSession.getAttribute("user"));
-            trackList = new TrackList(fileList);
-        } catch (NamingException ne) {
-            if(trackList == null){
-                trackList = new TrackList();
-            }
-            // TODO: Don't like that trackList also is responsible for message delivery
-            trackList.setErrorMessage("Failed to connect the server");
-            ne.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            if(remotingManager != null){
-                remotingManager.terminate();
-            }
-        }
-        return trackList;
-    }
-
     @RequestMapping("/api/getLink")
     public @ResponseBody String getFileLink(HttpSession httpSession,
-                                            @RequestParam("path") String path,
                                             @RequestParam("cloud_id") Integer cloudId,
                                             @RequestParam("file_id") String fileId) {
 
@@ -156,7 +123,7 @@ public class MusicController {
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            fileLink = bean.getFileSrc(cloudId, path, (Long) httpSession.getAttribute("user"), fileId);
+            fileLink = bean.getFileSrc((Long) httpSession.getAttribute("user"), cloudId, fileId);
         } catch (NamingException ne) {
             ne.printStackTrace();
             fileLink = "error";

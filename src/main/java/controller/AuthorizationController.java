@@ -144,7 +144,6 @@ public class AuthorizationController {
 
         RemotingManager remotingManager = null;
         try {
-            //TODO make static
             remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
@@ -266,7 +265,6 @@ public class AuthorizationController {
 
         RemotingManager remotingManager = null;
         try {
-            //TODO make static
             remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context

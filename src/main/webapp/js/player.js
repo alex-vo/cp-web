@@ -56,9 +56,9 @@ Player = function() {
             selectSongByElement(this.current);
         }
         if(this.paused){
-            this.playTrack();
+            this.playMusic();
         }else{
-            this.pauseTrack();
+            this.pauseMusic();
         }
     }
 
@@ -77,7 +77,7 @@ Player = function() {
         }
         selectSongByElement(this.current);
 
-        this.playTrack();
+        this.playMusic();
     }
 
     this.prev = function(){
@@ -93,26 +93,26 @@ Player = function() {
         }
         selectSongByElement(this.current);
 
-        this.playTrack();
+        this.playMusic();
     }
 
-    this.playTrack = function(){
+    this.playMusic = function(){
         this.paused = false;
         $("#button-play-pause").attr('class', 'button-pause-big');
         $(".pause-small").attr("class", "play-small");
         var songName = getSongTitle(this.current);
-        $(".listed-track").each(function () {
-            if ($(this).find(".track-title").text() == songName) {
+        $(".listed-song").each(function () {
+            if ($(this).find(".song-title").text() == songName) {
                 $(this).find(".play-small").attr("class", "pause-small");
             }
         });
         if(songName){
-            $("#track-name").text(songName);
+            $("#song-name").text(songName);
             $("#jquery_jplayer").jPlayer("play");
         }
     }
 
-    this.pauseTrack = function(){
+    this.pauseMusic = function(){
         this.paused = true;
         $("#button-play-pause").attr('class', 'button-play-big');
         $(".pause-small").attr("class", "play-small");
@@ -122,23 +122,23 @@ Player = function() {
     }
 
     this.playSong = function (obj) {
-        var trackNumber = $(".listed-track").index($(obj).closest(".listed-track"));
-        if (this.current == this.list[trackNumber]) {
+        var songNumber = $(".listed-song").index($(obj).closest(".listed-song"));
+        if (this.current == this.list[songNumber]) {
             this.playStop();
         } else {
-            clickedObject = this.list[trackNumber];
+            clickedObject = this.list[songNumber];
             selectSongByElement(clickedObject);
             if (clickedObject["url"]) {
                 this.current = clickedObject;
-                this.playTrack();
+                this.playMusic();
             }
         }
     }
 
     this.getMetadata = function (songHtmlElement) {
-        var trackNumber = $(".listed-track").index($(songHtmlElement).closest(".listed-track"));
+        var songNumber = $(".listed-song").index($(songHtmlElement).closest(".listed-song"));
 
-        this.current = this.list[trackNumber];
+        this.current = this.list[songNumber];
 
         requestSongMetadata(this.current, function (songObj) {
             // need to white while metadata not get
@@ -151,7 +151,7 @@ Player = function() {
     updateVisibleMetadata = function (songObj, songHtmlElement) {
 
         $metadataHtml = renderSongMetadata(songObj);
-        $(songHtmlElement).closest(".listed-track").find(".metadata").html($metadataHtml);
+        $(songHtmlElement).closest(".listed-song").find(".metadata").html($metadataHtml);
 
     }
 
@@ -171,11 +171,11 @@ Player = function() {
     renderPlayList = function (data) {
         if (data) {
             pagePlayer.list = data;
-            $('#track-list').empty();
-            $('#track-list').removeClass("waiting");
+            $('#song-list').empty();
+            $('#song-list').removeClass("waiting");
             for (var i = 0; i < data.length; i++) {
                 var songElement = renderSongElement(data[i]);
-                $('#track-list').append(songElement);
+                $('#song-list').append(songElement);
             }
         }else if(data && data["errorMessage"]){
             $("#errorMessage").text(data["errorMessage"]);
@@ -185,9 +185,9 @@ Player = function() {
 
         var title = getSongTitle(song);
         var songElement =
-            '<div class="listed-track">' +
+            '<div class="listed-song">' +
                 '<div class="play-small" onclick="pagePlayer.playSong(this)"></div>' +
-                '<span class="track-title">' + title + '</span>' +
+                '<span class="song-title">' + title + '</span>' +
                 '<span class="metadata"> ' + renderSongMetadata(song) + '</span>' +
                 '<span class="metadataRefreshButton" onclick="pagePlayer.getMetadata(this)">refresh</span>' +
                 '<br/>' +
@@ -257,8 +257,6 @@ Player = function() {
     requestSongUrl = function (songObject) {
         var url = "";
         $.ajax({
-            // TODO: do not send driveID if it is Dropbox
-            //url: "api/getLink?path=" + songObject["filePath"] + "&cloud_id=" + songObject["cloudId"] + "&file_id=" + songObject["driveId"],
             url: "api/getLink?cloud_id=" + songObject["cloudId"] + "&file_id=" + songObject["fileId"] ,
             async: false,
             cache: false,

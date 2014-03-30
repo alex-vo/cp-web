@@ -48,13 +48,13 @@
             <div id="button-prev" onclick="pagePlayer.prev();"></div>
             <div id="button-play-pause" class="button-play-big" onclick="pagePlayer.playStop();"></div>
             <div id="button-next" onclick="pagePlayer.next();"></div>
-            <div id="track-name"></div>
+            <div id="song-name"></div>
             <div id="progress-bar">
                 <div id="progress-indicator"></div>
             </div>
         </div>
     </div>
-    <div id="track-list" class="waiting"></div>
+    <div id="song-list" class="waiting"></div>
 </div>
 
 <div id="jquery_jplayer"></div>

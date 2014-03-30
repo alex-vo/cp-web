@@ -54,11 +54,11 @@
     background-position-y: center;
 }
 
-.listed-track{
+.listed-song{
     height: 30px;
 }
 
-.track-title{
+.song-title{
     position: relative;
     vertical-align: middle;
     color: white;
@@ -105,7 +105,7 @@
     vertical-align: top;
 }
 
-#track-name{
+#song-name{
     display: inline-block;
     vertical-align: top;
     margin: 15px 0px 0px 30px;
@@ -134,7 +134,7 @@
     left: -4px;
 }
 
-#track-list.waiting{
+#song-list.waiting{
     background: #fff;
     background-image: url("../img/spinner.gif");
     background-repeat: no-repeat;

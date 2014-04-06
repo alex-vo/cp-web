@@ -1,16 +1,3 @@
-.player-body {
-    background: #191919;
-    opacity: 0.8;
-
-    position: absolute;;
-    left: 50%;
-    margin-left: -300px;
-    width: 600px;
-    list-style: none;
-
-    padding: 0;
-    margin-top: 0;
-}
 
 #add-cloud-button{
     position:absolute;
@@ -32,117 +19,6 @@
     color:white
 }
 
-.play-small{
-    width: 20px;
-    height: 20px;
-    margin: 5px 5px 5px 5px;
-    display: inline-block;
-    background: url("../img/play-small.png");
-    background-repeat: no-repeat;
-    vertical-align: middle;
-    background-position-y: center;
-}
-
-.pause-small{
-    width: 20px;
-    height: 20px;
-    margin: 5px 5px 5px 5px;
-    display: inline-block;
-    background: url("../img/pause-small.png");
-    background-repeat: no-repeat;
-    vertical-align: middle;
-    background-position-y: center;
-}
-
-.listed-song{
-    height: 30px;
-}
-
-.song-title{
-    position: relative;
-    vertical-align: middle;
-    color: white;
-    font-family: arial,helvetica,sans-serif;
-}
-
-#player-controls{
-    background: #333;
-    width: 600px;
-    height: 100px;
-}
-
-#button-prev{
-    background: url("../img/prev-big.png");
-    height: 20px;
-    width: 34px;
-    display: inline-block;
-    margin: 15px 5px 5px 5px;
-    vertical-align: top;
-}
-
-.button-play-big{
-     background: url("../img/play-big.png");
-     height: 40px;
-     width: 35px;
-     display: inline-block;
-     margin: 5px 5px 5px 5px;
-}
-
-.button-pause-big{
-    background: url("../img/pause-big.png");
-    height: 40px;
-    width: 35px;
-    display: inline-block;
-    margin: 5px 5px 5px 5px;
-}
-
-#button-next{
-    background: url("../img/next-big.png");
-    height: 20px;
-    width: 34px;
-    display: inline-block;
-    margin: 15px 5px 5px 5px;
-    vertical-align: top;
-}
-
-#song-name{
-    display: inline-block;
-    vertical-align: top;
-    margin: 15px 0px 0px 30px;
-    font-family: arial,helvetica,sans-serif;
-    color: white;
-    font-size: 20px;
-}
-
-#progress-bar{
-    width: 580px;
-    height: 6px;
-    background: #5F5F5F;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 10px;
-    border-radius: 4px;
-}
-
-#progress-indicator{
-    height: 8px;
-    width: 8px;
-    background: #fff;
-    top: -1px;
-    position: relative;
-    border-radius: 4px;
-    left: -4px;
-}
-
-#song-list.waiting{
-    background: #fff;
-    background-image: url("../img/spinner.gif");
-    background-repeat: no-repeat;
-    background-position: center;
-    height: 400px;
-    opacity:0.95;
-}
-
 .metadata{
     position: relative;
     vertical-align: middle;
@@ -154,4 +30,16 @@
 .metadataRefreshButton{
     color: white;
     font-family: arial,helvetica,sans-serif;
+}
+
+.leftColumn{
+    float: left;
+
+}
+
+.centerColumn{
+    float: left;
+}
+.rightColumn{
+    float: right;
 }

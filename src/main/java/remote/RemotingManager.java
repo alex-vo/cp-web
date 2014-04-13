@@ -40,4 +40,10 @@ public class RemotingManager {
             }
         }
     }
+
+    @Override
+    public void finalize() throws Throwable {
+        this.terminate();
+        super.finalize();
+    }
 }

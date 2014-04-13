@@ -39,10 +39,8 @@ public class RequestControlFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          FilterChain filterChain) throws IOException, ServletException {
-        String uri = ((HttpServletRequest) servletRequest).getRequestURI();
-        if(!uri.endsWith("/register") && !uri.endsWith("/registerForm") && !uri.endsWith("/welcome")
-                && !uri.endsWith("/login") && !localAddresses.contains(servletRequest.getRemoteAddr())
-                && ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null){
+
+        if( isIncorrectRequest(servletRequest) ){
             ((HttpServletResponse)servletResponse).sendRedirect("welcome");
             return;
         }
@@ -52,6 +50,13 @@ public class RequestControlFilter implements Filter {
     @Override
     public void destroy() {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    private boolean isIncorrectRequest(ServletRequest servletRequest){
+        String uri = ((HttpServletRequest) servletRequest).getRequestURI();
+        return  (!uri.endsWith("/register") && !uri.endsWith("/registerForm") && !uri.endsWith("/welcome")
+                && !uri.endsWith("/login") && !localAddresses.contains(servletRequest.getRemoteAddr())
+                && ((HttpServletRequest) servletRequest).getSession().getAttribute("user") == null);
     }
 
 }

@@ -9,17 +9,18 @@
 
     <meta charset="UTF-8" />
 
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link type="text/css" rel="stylesheet" href="css/jplayerSkins/blue.monday/jplayer.blue.monday.css"/>
-    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link type="text/css" rel="stylesheet" href="css/jplayer/blue.monday/jplayer.blue.monday.css"/>
+    <%--<link type="text/css" rel="stylesheet" href="css/style.css"/>--%>
 
     <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
-    <script type="text/javascript" src="js/jplayer.playlist.js"></script>
-    <script type="text/javascript" src="js/player.js"></script>
-    <script src="js/bootstrap.min.js"></script>
 
+    <script type="text/javascript" src="js/jplayer/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="js/jplayer/script.js"></script>
 
+    <script src="js/bootstrap/bootstrap.min.js"></script>
+
+    <%--Metadata retriving and parsing--%>
     <script src="js/id3/binaryfile.js" type="text/javascript"></script>
     <script src="js/id3/bufferedbinaryajax.js" type="text/javascript"></script>
     <script src="js/id3/filereader.js" type="text/javascript"></script>

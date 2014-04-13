@@ -1,9 +1,9 @@
 package controller;
 
+import common.LocalProperties;
 import ejb.AuthorizationBeanRemote;
 import model.LoginFormModel;
 import model.RegisterFormModel;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import remote.RemotingManager;
+import remote.CoreRemotingManager;
 
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -30,32 +29,8 @@ import javax.validation.Valid;
 @Controller
 public class AuthorizationController {
 
-    @Value("#{localProperties['dropbox.redirect.uri']}")
-    public String DROPBOX_REDIRECT_URI;
-
-    @Value("#{localProperties['dropbox.client.id']}")
-    public String DROPBOX_CLIENT_ID;
-
-    @Value("#{localProperties['drive.redirect.uri']}")
-    public String DRIVE_REDIRECT_URI;
-
-    @Value("#{localProperties['drive.client.id']}")
-    public String DRIVE_CLIENT_ID;
-
-    @Value("#{localProperties['jboss.login']}")
-    public String JBOSS_LOGIN;
-
-    @Value("#{localProperties['jboss.password']}")
-    public String JBOSS_PASSWORD;
-
-    @Value("#{localProperties['jboss.url']}")
-    public String JBOSS_URL;
-
-    @Value("#{localProperties['dropbox.auth.link']}")
-    private String DROPBOX_AUTH_LINK;
-
-    @Value("#{localProperties['drive.auth.link']}")
-    private String DRIVE_AUTH_LINK;
+    private static String DROPBOX_AUTH_LINK = LocalProperties.getProperties().getProperty("dropbox.auth.link");
+    private static String DRIVE_AUTH_LINK = LocalProperties.getProperties().getProperty("drive.auth.link");
 
     @RequestMapping("/welcome")
     public String printWelcome(ModelMap model) {
@@ -75,12 +50,11 @@ public class AuthorizationController {
             return result;
         }
 
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             Long userId = bean.login(loginForm.getLogin(), loginForm.getPassword());
             if(userId != null && userId > 0){
                 httpSession.setAttribute("user", userId);
@@ -94,9 +68,7 @@ public class AuthorizationController {
         } catch (Exception e){
             e.printStackTrace();
         } finally {
-            if(remotingManager != null){
-                remotingManager.terminate();
-            }
+            remotingManager = null;
         }
 
         return result;
@@ -116,12 +88,11 @@ public class AuthorizationController {
     @RequestMapping("/removeDropbox")
     public String removeDropbox(RedirectAttributes redirectAttributes, HttpSession httpSession){
 
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             Boolean removedDropboxAccount = bean.removeDropboxAcoount((Long) httpSession.getAttribute("user"));
             if(removedDropboxAccount){
                 redirectAttributes.addFlashAttribute("successMessage", "Removed Dropbox account");
@@ -142,12 +113,11 @@ public class AuthorizationController {
                                       RedirectAttributes redirectAttributes,
                                       HttpSession httpSession){
 
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             if(httpSession.getAttribute("user") != null){
                 Boolean retrievedCredentials = bean.retrieveDropboxCredentials((Long) httpSession.getAttribute("user"), code);
                 if(retrievedCredentials){
@@ -185,12 +155,11 @@ public class AuthorizationController {
     @RequestMapping("/removeDrive")
     public String removeDrive(RedirectAttributes redirectAttributes, HttpSession httpSession){
 
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             Boolean removedDriveAccount = bean.removeGDriveAccount((Long) httpSession.getAttribute("user"));
             if(removedDriveAccount){
                 redirectAttributes.addFlashAttribute("successMessage", "Removed Google Drive account");
@@ -210,12 +179,11 @@ public class AuthorizationController {
     public String driveAuthComplete(@RequestParam(value = "code") String code,
                                     RedirectAttributes redirectAttributes,
                                     HttpSession httpSession){
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             if(httpSession.getAttribute("user") != null){
                 Boolean retrievedCredentials = bean.retrieveGDriveCredentials((Long) httpSession.getAttribute("user"), code);
                 if(retrievedCredentials){
@@ -263,12 +231,11 @@ public class AuthorizationController {
             return "redirect:registerForm";
         }
 
-        RemotingManager remotingManager = null;
+        CoreRemotingManager remotingManager = null;
         try {
-            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
-            Context context = remotingManager.getContext();
-            AuthorizationBeanRemote bean = (AuthorizationBeanRemote) context
-                    .lookup("ejb:/cp-core//AuthorizationBean!ejb.AuthorizationBeanRemote");
+            remotingManager = new CoreRemotingManager();
+            AuthorizationBeanRemote bean = remotingManager.getAuthorizationBeanRemote();
+
             Boolean registered = bean.registerUser(registerFormModel.getLogin(), registerFormModel.getPassword());
             if(registered){
                 redirectAttributes.addFlashAttribute("successMessage", "Registration completed successfully");

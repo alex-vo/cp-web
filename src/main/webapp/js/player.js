@@ -1,4 +1,3 @@
-// playerObj should be standart JS DOM instance
 var songData = new Array();
 Player = function() {
     this.list = new Array("Kalimba.mp3", "Maid with the Flaxen Hair.mp3");
@@ -288,3 +287,20 @@ Player = function() {
     }
 };
 
+addPlaylist = function(){
+    playListName = prompt("Enter playlist name");
+    if(playListName != ''){
+        $.ajax({
+            url: 'api/addPlayList?name=' + playListName,
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (data) {
+             $("#errorMessage").text("Failed to connect the server");
+            }
+        });
+    }else{
+        addPlaylist();
+    }
+    return;
+}

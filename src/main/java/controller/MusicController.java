@@ -136,4 +136,24 @@ public class MusicController {
         }
         return fileLink;
     }
+
+    @RequestMapping("api/addPlayList")
+    public @ResponseBody long addPlayList(HttpSession httpSession, @RequestParam("name") String name){
+        RemotingManager remotingManager = null;
+        long playListId = -1;
+        try {
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            ContentBeanRemote bean = (ContentBeanRemote) context
+                    .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
+            playListId = bean.addPlayList((Long)httpSession.getAttribute("user"), name);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
+        }
+        return playListId;
+    }
 }

@@ -37,6 +37,7 @@
 <ul id="add-cloud-button">
     <li><a href="addDropbox">ADD DROPOX</a></li>
     <li><a href="addDrive">ADD GOOGLE DRIVE</a></li>
+    <li><a href="#" onclick="addPlaylist();">Add Playlist</a></li>
 </ul>
 <ul id="remove-cloud-button">
     <li><a href="removeDropbox">Disconnect Dropbox account</a></li>

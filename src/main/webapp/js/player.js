@@ -155,11 +155,15 @@ Player = function() {
     }
 
     saveMetadataToServer = function (songObj) {
-        var url = 'api/saveSongMetadata?jsonSongObject=' + JSON.stringify(songObj);
+        console.log(JSON.stringify(songObj));
+        var url = 'api/saveSongMetadata';
         $.ajax({
+            type: "POST",
             url: url,
+            data: JSON.stringify(songObj),
             cache: false,
             dataType: 'json',
+            contentType: "application/json",
             success: function (data) {
                 // TODO process error
                 console.log(data);

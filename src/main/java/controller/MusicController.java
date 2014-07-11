@@ -1,14 +1,15 @@
 package controller;
 
 
-import com.google.gson.Gson;
 import ejb.ContentBeanRemote;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import remote.RemotingManager;
@@ -18,6 +19,7 @@ import structure.Song;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,9 +73,10 @@ public class MusicController {
         return playList;
     }
 
-    @RequestMapping("/api/saveSongMetadata")
-    public @ResponseBody boolean saveSongMetadata(HttpSession httpSession,
-                                               @RequestParam(value = "jsonSongObject", required = true) String jsonSongObject) {
+    @RequestMapping(value="/api/saveSongMetadata",
+            method = RequestMethod.POST, headers = {"Content-type=application/json"})
+    @ResponseBody
+    public boolean saveSongMetadata(HttpSession httpSession, @RequestBody Song songObj) {
 
         RemotingManager remotingManager = null;
 
@@ -84,19 +87,11 @@ public class MusicController {
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
 
-            Gson gson = new Gson();
-
-            logger.debug("JsonString parameter:" + jsonSongObject);
-            //convert the json string back to object
-            Song songObj = gson.fromJson(jsonSongObject, Song.class);
-
             logger.debug("Json converted java object:" + songObj);
 
             Long userId = (Long) httpSession.getAttribute("user");
             logger.info(songObj + "  " + userId);
             res = bean.saveSongMetadata(songObj, userId);
-
-
         } catch (NamingException ne) {
             ne.printStackTrace();
         } catch (Exception e) {
@@ -155,5 +150,25 @@ public class MusicController {
             }
         }
         return playListId;
+    }
+
+    @RequestMapping("api/getPlayLists")
+    public @ResponseBody List<PlayList> getPlayLists(HttpSession httpSession){
+        RemotingManager remotingManager = null;
+        List<PlayList> result = null;
+        try {
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            ContentBeanRemote bean = (ContentBeanRemote) context
+                    .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
+            result = bean.getPlayLists((Long)httpSession.getAttribute("user"));
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
+        }
+        return result;
     }
 }

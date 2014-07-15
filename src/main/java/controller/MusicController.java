@@ -58,7 +58,7 @@ public class MusicController {
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
             playList = bean.getPlayList((Long) httpSession.getAttribute("user"));
-            for(Song song:playList){
+            for(Song song : playList.getSongs()){
                 logger.info("Song:" +song);
             }
         } catch (NamingException ne) {

@@ -71,7 +71,7 @@ public class AuthorizationController {
         if (binding.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginForm", binding);
             redirectAttributes.addFlashAttribute("loginForm", loginForm);
-            redirectAttributes.addFlashAttribute("successMessage", "Failed to log in");
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to log in");
             return result;
         }
 
@@ -92,6 +92,7 @@ public class AuthorizationController {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage", "Error while logging in");
             e.printStackTrace();
         } finally {
             if(remotingManager != null){

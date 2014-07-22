@@ -1,6 +1,7 @@
 var songData = new Array();
 Player = function() {
-    this.list = new Array("Kalimba.mp3", "Maid with the Flaxen Hair.mp3");
+    this.list = new Array();
+    this.mainList = new Array();
     this.current = null;
     this.paused = true;
     this.seeking = false;
@@ -34,18 +35,40 @@ Player = function() {
         }
     });
 
-    this.getPlayList = function () {
+    this.getPlayList = function (playListId) {
         var url = 'api/getPlayList';
+        if(playListId){
+            url += "?id=" + playListId;
+        }
         $.ajax({
             url: url,
             cache: false,
             dataType: 'json',
             success: function (data) {
-                console.log(data);
+                if(!playListId){
+                    pagePlayer.mainList = data;
+                }
                 songData = data; // global
                 renderPlayList(data);
             }
         });
+    };
+
+    this.getMyPlayLists = function(){
+         var url = 'api/getPlayLists';
+         $.ajax({
+             url: url,
+             cache: false,
+             dataType: 'json',
+             success: function (data) {
+                 var playlists = "";
+                 for (var i = 0; i < data.length; i++) {
+                    playlists += "<a href='#' onclick='pagePlayer.getPlayList("
+                        + data[i]["id"] + ")'>" + data[i]["name"] + "</a><br/>";
+                 }
+                 $("#playlists").append(playlists);
+             }
+         });
     };
 
     this.playStop = function(){
@@ -62,6 +85,7 @@ Player = function() {
     }
 
     this.getPlayList();
+    this.getMyPlayLists();
 
     this.next = function(){
         for(var i = 0; i < this.list.length; i++){
@@ -155,7 +179,6 @@ Player = function() {
     }
 
     saveMetadataToServer = function (songObj) {
-        console.log(JSON.stringify(songObj));
         var url = 'api/saveSongMetadata';
         $.ajax({
             type: "POST",
@@ -173,11 +196,26 @@ Player = function() {
 
     renderPlayList = function (data) {
         if (data) {
-            pagePlayer.list = data;
+            if(pagePlayer.mainList.length == 0){
+                pagePlayer.mainList = data;
+                pagePlayer.list = data;
+            }else{
+                pagePlayer.list = [];
+                for(var i = 0; i < pagePlayer.mainList.length; i++){
+                    for(var j = 0; j < data.length; j++){
+                        if(pagePlayer.mainList[i]["fileId"] == data[j]["fileId"]
+                            && pagePlayer.mainList[i]["cloudId"] == data[j]["cloudId"]){
+
+                                pagePlayer.list.push(pagePlayer.mainList[i]);
+                                break;
+                            }
+                    }
+                }
+            }
             $('#track-list').empty();
             $('#track-list').removeClass("waiting");
-            for (var i = 0; i < data.length; i++) {
-                var songElement = renderSongElement(data[i]);
+            for (var i = 0; i < pagePlayer.list.length; i++) {
+                var songElement = renderSongElement(pagePlayer.list[i]);
                 $('#track-list').append(songElement);
             }
         }else if(data && data["errorMessage"]){
@@ -193,7 +231,8 @@ Player = function() {
                 '<span class="track-title">' + title + '</span>' +
                 '<span class="metadata"> ' + renderSongMetadata(song) + '</span>' +
                 '<span class="metadataRefreshButton" onclick="pagePlayer.getMetadata(this)">refresh</span>' +
-                '<br/>' +
+                '<span class="checkbox_right"><input type="checkbox" cloudId="' + song["cloudId"] + '"' +
+                'name="song" value="' + song["fileId"] + '"></span>' +
                 '</div>';
         return  songElement;
     }
@@ -291,20 +330,53 @@ Player = function() {
     }
 };
 
+displayAddPlayListForm = function(){
+    if($("#addPlayListContainer").contents().length == 0){
+        $("#addPlayListContainer").append("<input type=\"text\" id=\"playListName\"/>"
+            + "<button onclick=\"addPlaylist('aa'); return;\">Add</button>");
+    }
+    $(".checkbox_right").css("display", "inline");
+    $("#add-playlist-link").text("Cancel");
+    $("#add-playlist-link").attr("onclick", "hideAddPlayListForm();");
+    return;
+};
+
+hideAddPlayListForm = function(){
+    $("#addPlayListContainer").empty();
+    $(".checkbox_right").css("display", "none");
+    $("#add-playlist-link").text("Add Playlist");
+    $("#add-playlist-link").attr("onclick", "displayAddPlayListForm();");
+    return;
+};
+
 addPlaylist = function(){
-    playListName = prompt("Enter playlist name");
+    var playListName = $("#playListName").val();
+    var playList = {id:null, name:playListName};
+    var tracks=[];
+    $("input[type='checkbox'][name='song']:checked").each(function(){
+        trackObj = {fileId:$(this).attr("value"), fileName:null, url:null,
+            cloudId:parseInt($(this).attr("cloudId")), metadata:null, urlExpiresTime:null};
+        tracks.push(trackObj);
+    });
+    playList["songs"] = tracks;
+
     if(playListName != ''){
+        $(".checkbox_right").css("display", "inline");
         $.ajax({
-            url: 'api/addPlayList?name=' + playListName,
+            type: "POST",
+            url: 'api/addPlayList',
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(playList),
             success: function (data) {
-                console.log(data);
+                //TODO data=id, insert into list together with name
             },
             error: function (data) {
-             $("#errorMessage").text("Failed to connect the server");
+                $("#errorMessage").text("Failed to connect the server");
             }
         });
     }else{
         addPlaylist();
     }
     return;
-}
+};

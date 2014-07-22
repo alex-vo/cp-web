@@ -48,7 +48,8 @@ public class MusicController {
     }
 
     @RequestMapping("/api/getPlayList")
-    public @ResponseBody PlayList getPlayList(HttpSession httpSession) {
+    public @ResponseBody List<Song> getPlayList(HttpSession httpSession,
+                                                @RequestParam(value = "id", required = false) Long playListId) {
 
         RemotingManager remotingManager = null;
         PlayList playList = null;
@@ -57,9 +58,13 @@ public class MusicController {
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            playList = bean.getPlayList((Long) httpSession.getAttribute("user"));
+            if(playListId == null){
+                playList = bean.getPlayList((Long) httpSession.getAttribute("user"));
+            }else{
+                playList = bean.getPlayList((Long) httpSession.getAttribute("user"), playListId);
+            }
             for(Song song : playList.getSongs()){
-                logger.info("Song:" +song);
+                logger.info("Song: " + song);
             }
         } catch (NamingException ne) {
             ne.printStackTrace();
@@ -70,7 +75,7 @@ public class MusicController {
                 remotingManager.terminate();
             }
         }
-        return playList;
+        return playList.getSongs();
     }
 
     @RequestMapping(value="/api/saveSongMetadata",
@@ -132,8 +137,8 @@ public class MusicController {
         return fileLink;
     }
 
-    @RequestMapping("api/addPlayList")
-    public @ResponseBody long addPlayList(HttpSession httpSession, @RequestParam("name") String name){
+    @RequestMapping(value = "api/addPlayList", method = RequestMethod.POST, headers = {"Content-type=application/json"})
+    public @ResponseBody long addPlayList(HttpSession httpSession, @RequestBody PlayList playList){
         RemotingManager remotingManager = null;
         long playListId = -1;
         try {
@@ -141,7 +146,7 @@ public class MusicController {
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context
                     .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
-            playListId = bean.addPlayList((Long)httpSession.getAttribute("user"), name);
+            playListId = bean.addPlayList((Long) httpSession.getAttribute("user"), playList);
         } catch (Exception e){
             e.printStackTrace();
         } finally {

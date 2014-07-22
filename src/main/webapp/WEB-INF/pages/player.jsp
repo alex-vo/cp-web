@@ -37,7 +37,7 @@
 <ul id="add-cloud-button">
     <li><a href="addDropbox">ADD DROPOX</a></li>
     <li><a href="addDrive">ADD GOOGLE DRIVE</a></li>
-    <li><a href="#" onclick="addPlaylist();">Add Playlist</a></li>
+    <li><a id="add-playlist-link" href="#" onclick="displayAddPlayListForm();">Add Playlist</a></li>
 </ul>
 <ul id="remove-cloud-button">
     <li><a href="removeDropbox">Disconnect Dropbox account</a></li>
@@ -57,7 +57,7 @@
     </div>
     <div id="track-list" class="waiting"></div>
 </div>
-
+<div id="addPlayListContainer"></div>
 <div id="jquery_jplayer"></div>
 <audio controls="controls" id="player" preload="auto" style="display: none;" >
     <source src="" type="audio/mpeg">
@@ -70,6 +70,11 @@
     });
 </script>
 
-<div id="logout-button"><a href="logout">Logout</a></div>
+<div id="logout-button">
+    <ul>
+        <li><a href="logout">Logout</a></li>
+        <li><div id="playlists"></div></li>
+    </ul>
+</div>
 </body>
 </html>

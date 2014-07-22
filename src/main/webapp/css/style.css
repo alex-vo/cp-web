@@ -155,3 +155,8 @@
     color: white;
     font-family: arial,helvetica,sans-serif;
 }
+
+.checkbox_right{
+    float: right;
+    display:none;
+}

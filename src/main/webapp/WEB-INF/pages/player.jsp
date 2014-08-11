@@ -74,6 +74,7 @@
     <ul>
         <li><a href="logout">Logout</a></li>
         <li><div id="playlists"></div></li>
+        <li><div id="show-all-songs"></div></li>
     </ul>
 </div>
 </body>

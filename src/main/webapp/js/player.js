@@ -37,21 +37,26 @@ Player = function() {
 
     this.getPlayList = function (playListId) {
         var url = 'api/getPlayList';
-        if(playListId){
-            url += "?id=" + playListId;
-        }
-        $.ajax({
-            url: url,
-            cache: false,
-            dataType: 'json',
-            success: function (data) {
-                if(!playListId){
-                    pagePlayer.mainList = data;
-                }
-                songData = data; // global
-                renderPlayList(data);
+        if(playListId == -1){
+            renderPlayList(this.mainList);
+        }else{
+            if(playListId){
+                url += "?id=" + playListId;
             }
-        });
+            $.ajax({
+                url: url,
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    if(!playListId){
+                        pagePlayer.mainList = data;
+                    }
+                    songData = data; // global
+                    renderPlayList(data);
+                }
+            });
+        }
+        return;
     };
 
     this.getMyPlayLists = function(){
@@ -62,13 +67,33 @@ Player = function() {
              dataType: 'json',
              success: function (data) {
                  var playlists = "";
-                 for (var i = 0; i < data.length; i++) {
-                    playlists += "<a href='#' onclick='pagePlayer.getPlayList("
-                        + data[i]["id"] + ")'>" + data[i]["name"] + "</a><br/>";
+                 console.log(data);
+                 if(data){
+                     for (var i = 0; i < data.length; i++) {
+                        playlists += "<a href='#' onclick='pagePlayer.getPlayList("
+                            + data[i]["id"] + ")'>" + data[i]["name"] + "</a><div class='delete-playlist' "
+                            + "onclick='pagePlayer.deletePlayList(this, " + data[i]["id"] + ");'></div><br/>";
+                     }
+                     showAllSongsHTML = "<a href='#' onclick='pagePlayer.getPlayList(-1);'>Show all songs</a><br/>";
+                     $("#playlists").html(playlists);
+                     $("#show-all-songs").html(showAllSongsHTML);
                  }
-                 $("#playlists").append(playlists);
              }
          });
+    };
+
+    this.deletePlayList = function(object, playListId){
+        var url = "api/deletePlayList";
+        $.post(url, {id:playListId}, function(result){
+            if(result){
+                $(object).next().remove();
+                $(object).prev().remove();
+                $(object).remove();
+            }else{
+                $("#errorMessage").text("Error while deleting playlist");
+            }
+        });
+        return;
     };
 
     this.playStop = function(){
@@ -333,7 +358,7 @@ Player = function() {
 displayAddPlayListForm = function(){
     if($("#addPlayListContainer").contents().length == 0){
         $("#addPlayListContainer").append("<input type=\"text\" id=\"playListName\"/>"
-            + "<button onclick=\"addPlaylist('aa'); return;\">Add</button>");
+            + "<button onclick=\"addPlaylist(); return;\">Add</button>");
     }
     $(".checkbox_right").css("display", "inline");
     $("#add-playlist-link").text("Cancel");
@@ -358,25 +383,38 @@ addPlaylist = function(){
             cloudId:parseInt($(this).attr("cloudId")), metadata:null, urlExpiresTime:null};
         tracks.push(trackObj);
     });
-    playList["songs"] = tracks;
-
-    if(playListName != ''){
-        $(".checkbox_right").css("display", "inline");
-        $.ajax({
-            type: "POST",
-            url: 'api/addPlayList',
-            dataType: 'json',
-            contentType: "application/json",
-            data: JSON.stringify(playList),
-            success: function (data) {
-                //TODO data=id, insert into list together with name
-            },
-            error: function (data) {
-                $("#errorMessage").text("Failed to connect the server");
-            }
-        });
+    if(tracks.length == 0){
+        $("#errorMessage").text("Please select songs");
     }else{
-        addPlaylist();
+        playList["songs"] = tracks;
+
+        if(playListName != ''){
+            $(".checkbox_right").css("display", "inline");
+            $.ajax({
+                type: "POST",
+                url: 'api/addPlayList',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(playList),
+                success: function (data) {
+                    //TODO data=id, insert into list together with name  uncheck
+                    $("#successMessage").text("Playlist added");
+                    console.log(data);
+                    playlist = "<a href='#' onclick='pagePlayer.getPlayList("
+                            + data + ")'>" + playListName + "</a><div class='delete-playlist' "
+                            + "onclick='pagePlayer.deletePlayList(this, " + data + ");'></div><br/>";
+                    showAllSongsHTML = "<a href='#' onclick='pagePlayer.getPlayList(-1);'>Show all songs</a><br/>";
+                    $("#show-all-songs").html(showAllSongsHTML);
+                    $("#playlists").append(playlist);
+                    hideAddPlayListForm();
+                },
+                error: function (data) {
+                    $("#errorMessage").text("Failed to connect the server");
+                }
+            });
+        }else{
+            $("#errorMessage").text("Provide playlist name");
+        }
     }
     return;
 };

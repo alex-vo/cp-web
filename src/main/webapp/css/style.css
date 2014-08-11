@@ -160,3 +160,12 @@
     float: right;
     display:none;
 }
+
+.delete-playlist{
+    background-image: url("../img/delete.jpg");
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 20px;
+    width: 20px;
+    display:inline-block;
+}

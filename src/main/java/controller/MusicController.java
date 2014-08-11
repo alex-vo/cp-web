@@ -176,4 +176,24 @@ public class MusicController {
         }
         return result;
     }
+
+    @RequestMapping("api/deletePlayList")
+    public @ResponseBody boolean deletePlayList(HttpSession httpSession, @RequestParam("id") Long id){
+        RemotingManager remotingManager = null;
+        boolean result = false;
+        try {
+            remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
+            Context context = remotingManager.getContext();
+            ContentBeanRemote bean = (ContentBeanRemote) context
+                    .lookup("ejb:/cp-core//ContentBean!ejb.ContentBeanRemote");
+            result = bean.deletePlayList(id);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
+        }
+        return result;
+    }
 }

@@ -118,7 +118,6 @@ public class MusicController {
         RemotingManager remotingManager = null;
         String fileLink = null;
         try {
-            //TODO make static
             remotingManager = new RemotingManager(JBOSS_URL, JBOSS_LOGIN, JBOSS_PASSWORD);
             Context context = remotingManager.getContext();
             ContentBeanRemote bean = (ContentBeanRemote) context

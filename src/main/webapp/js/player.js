@@ -5,6 +5,7 @@ Player = function() {
     this.current = null;
     this.paused = true;
     this.seeking = false;
+    this.currentPlayListID = -1;
     $("#jquery_jplayer").jPlayer({
         swfPath: "js/Jplayer.swf",
         supplied: "mp3",
@@ -38,7 +39,7 @@ Player = function() {
     this.getPlayList = function (playListId) {
         var url = 'api/getPlayList';
         if(playListId == -1){
-            renderPlayList(this.mainList);
+            renderPlayList(this.mainList, playListId);
         }else{
             if(playListId){
                 url += "?id=" + playListId;
@@ -52,7 +53,7 @@ Player = function() {
                         pagePlayer.mainList = data;
                     }
                     songData = data; // global
-                    renderPlayList(data);
+                    renderPlayList(data, playListId);
                 }
             });
         }
@@ -67,7 +68,6 @@ Player = function() {
              dataType: 'json',
              success: function (data) {
                  var playlists = "";
-                 console.log(data);
                  if(data){
                      for (var i = 0; i < data.length; i++) {
                         playlists += "<a href='#' onclick='pagePlayer.getPlayList("
@@ -93,21 +93,22 @@ Player = function() {
                 $("#errorMessage").text("Error while deleting playlist");
             }
         });
+        if(playListId == this.currentPlayListID){
+            renderPlayList(this.mainList, -1);
+        }
         return;
     };
 
     this.playStop = function(){
         if(!this.current){
-            this.current = this.list[0];
-
-            selectSongByElement(this.current);
+            selectSongByElement(this.list[0]);
         }
         if(this.paused){
             this.playTrack();
         }else{
             this.pauseTrack();
         }
-    }
+    };
 
     this.getPlayList();
     this.getMyPlayLists();
@@ -116,33 +117,31 @@ Player = function() {
         for(var i = 0; i < this.list.length; i++){
             if(this.current == this.list[i]){
                 if(i == this.list.length - 1){
-                    this.current = this.list[0];
+                    selectSongByElement(this.list[0]);
                 }else{
-                    this.current = this.list[i + 1];
+                    selectSongByElement(this.list[i + 1]);
                 }
                 break;
             }
         }
-        selectSongByElement(this.current);
 
         this.playTrack();
-    }
+    };
 
     this.prev = function(){
         for(var i = 0; i < this.list.length; i++){
             if(this.current == this.list[i]){
                 if(i == 0){
-                    this.current = this.list[this.list.length - 1];
+                    selectSongByElement(this.list[this.list.length - 1]);
                 }else{
-                    this.current = this.list[i - 1];
+                    selectSongByElement(this.list[i - 1]);
                 }
                 break;
             }
         }
-        selectSongByElement(this.current);
 
         this.playTrack();
-    }
+    };
 
     this.playTrack = function(){
         this.paused = false;
@@ -167,7 +166,7 @@ Player = function() {
         if($("#jquery_jplayer").data("jPlayer").status.src){
             $("#jquery_jplayer").jPlayer("pause");
         }
-    }
+    };
 
     this.playSong = function (obj) {
         var trackNumber = $(".listed-track").index($(obj).closest(".listed-track"));
@@ -177,11 +176,10 @@ Player = function() {
             clickedObject = this.list[trackNumber];
             selectSongByElement(clickedObject);
             if (clickedObject["url"]) {
-                this.current = clickedObject;
                 this.playTrack();
             }
         }
-    }
+    };
 
     this.getMetadata = function (songHtmlElement) {
         var trackNumber = $(".listed-track").index($(songHtmlElement).closest(".listed-track"));
@@ -194,14 +192,14 @@ Player = function() {
             saveMetadataToServer(songObj);
         });
 
-    }
+    };
 
     updateVisibleMetadata = function (songObj, songHtmlElement) {
 
         $metadataHtml = renderSongMetadata(songObj);
         $(songHtmlElement).closest(".listed-track").find(".metadata").html($metadataHtml);
 
-    }
+    };
 
     saveMetadataToServer = function (songObj) {
         var url = 'api/saveSongMetadata';
@@ -219,7 +217,11 @@ Player = function() {
         });
     };
 
-    renderPlayList = function (data) {
+    renderPlayList = function (data, playListId) {
+        pagePlayer.currentPlayListID = playListId;
+        pagePlayer.pauseTrack();
+        $("#track-name").text("");
+        $("#progress-indicator").css('left', -4);
         if (data) {
             if(pagePlayer.mainList.length == 0){
                 pagePlayer.mainList = data;
@@ -236,6 +238,7 @@ Player = function() {
                             }
                     }
                 }
+                selectSongByElement(pagePlayer.list[0]);
             }
             $('#track-list').empty();
             $('#track-list').removeClass("waiting");
@@ -246,7 +249,8 @@ Player = function() {
         }else if(data && data["errorMessage"]){
             $("#errorMessage").text(data["errorMessage"]);
         }
-    }
+    };
+
     renderSongElement = function (song) {
 
         var title = getSongTitle(song);
@@ -260,7 +264,7 @@ Player = function() {
                 'name="song" value="' + song["fileId"] + '"></span>' +
                 '</div>';
         return  songElement;
-    }
+    };
 
     renderSongMetadata = function (song) {
 
@@ -274,7 +278,7 @@ Player = function() {
         }
 
         return metadataHtml;
-    }
+    };
 
     getSongTitle = function (song) {
         var title = '';
@@ -290,22 +294,23 @@ Player = function() {
          */
         title = song['fileName'];
         return title;
-    }
+    };
 
     selectSongByElement = function (element) {
+        pagePlayer.current = element;
         songUrl = getSongURL(element);
         if(songUrl){
             element["url"] = songUrl;
             selectSongByUrl(songUrl);
         }
-    }
+    };
 
 
     selectSongByUrl = function(songUrl){
         $("#jquery_jplayer").jPlayer("setMedia", {
             mp3: songUrl
         } );        
-    }
+    };
 
 
     getSongURL = function(songObject){
@@ -317,9 +322,8 @@ Player = function() {
             srcURL = requestSongUrl(songObject);
             songObject["url"] = srcURL;
         }
-        console.log(srcURL);
         return srcURL;
-    }
+    };
 
     requestSongUrl = function (songObject) {
         var url = "";
@@ -341,7 +345,7 @@ Player = function() {
             }
         });
         return url;
-    }
+    };
 
     requestSongMetadata = function (songObj, callback) {
         var songURL = getSongURL(songObj);
@@ -352,7 +356,7 @@ Player = function() {
             console.log(songObj["metadata"]);
             callback(songObj);
         });
-    }
+    };
 };
 
 displayAddPlayListForm = function(){
@@ -399,7 +403,6 @@ addPlaylist = function(){
                 success: function (data) {
                     //TODO data=id, insert into list together with name  uncheck
                     $("#successMessage").text("Playlist added");
-                    console.log(data);
                     playlist = "<a href='#' onclick='pagePlayer.getPlayList("
                             + data + ")'>" + playListName + "</a><div class='delete-playlist' "
                             + "onclick='pagePlayer.deletePlayList(this, " + data + ");'></div><br/>";

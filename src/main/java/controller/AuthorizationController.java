@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import remote.CoreRemotingManager;
+import remote.CoreRemotingManager;
 
 import javax.naming.NamingException;
 import javax.servlet.http.HttpSession;
@@ -46,7 +47,7 @@ public class AuthorizationController {
         if (binding.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.loginForm", binding);
             redirectAttributes.addFlashAttribute("loginForm", loginForm);
-            redirectAttributes.addFlashAttribute("successMessage", "Failed to log in");
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to log in");
             return result;
         }
 
@@ -66,9 +67,12 @@ public class AuthorizationController {
             redirectAttributes.addFlashAttribute("serverErrorMessage", "Failed to connect the server");
             ne.printStackTrace();
         } catch (Exception e){
+            redirectAttributes.addFlashAttribute("errorMessage", "Error while logging in");
             e.printStackTrace();
         } finally {
-            remotingManager = null;
+            if(remotingManager != null){
+                remotingManager.terminate();
+            }
         }
 
         return result;
